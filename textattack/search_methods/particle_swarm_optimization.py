@@ -71,10 +71,9 @@ class ParticleSwarmOptimization(PopulationBasedSearch):
 
         if random_result == pop_member.result:
             return False
-        else:
-            pop_member.attacked_text = random_result.attacked_text
-            pop_member.result = random_result
-            return True
+        pop_member.attacked_text = random_result.attacked_text
+        pop_member.result = random_result
+        return True
 
     def _equal(self, a, b):
         return -self.v_max if a == b else self.v_max
@@ -168,15 +167,13 @@ class ParticleSwarmOptimization(PopulationBasedSearch):
 
         best_neighbors = []
         score_list = []
-        for i in range(len(neighbors_list)):
-            if not neighbors_list[i]:
+        for neighbors in neighbors_list:
+            if not neighbors:
                 best_neighbors.append(current_result)
                 score_list.append(0)
                 continue
 
-            neighbor_results, self._search_over = self.get_goal_results(
-                neighbors_list[i]
-            )
+            neighbor_results, self._search_over = self.get_goal_results(neighbors)
             if not len(neighbor_results):
                 best_neighbors.append(current_result)
                 score_list.append(0)
@@ -341,7 +338,4 @@ def normalize(n):
     n = np.array(n)
     n[n < 0] = 0
     s = np.sum(n)
-    if s == 0:
-        return np.ones(len(n)) / len(n)
-    else:
-        return n / s
+    return np.ones(len(n)) / len(n) if s == 0 else n / s

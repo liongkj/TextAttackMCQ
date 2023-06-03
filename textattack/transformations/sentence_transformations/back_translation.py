@@ -64,8 +64,8 @@ class BackTranslation(SentenceTransformation):
         if lang == "en":
             src_texts.append(input[0])
         else:
-            if ">>" and "<<" not in lang:
-                lang = ">>" + lang + "<< "
+            if "<<" not in lang:
+                lang = f">>{lang}<< "
             src_texts.append(lang + input[0])
 
         # tokenize the input
@@ -73,11 +73,9 @@ class BackTranslation(SentenceTransformation):
 
         # translate the input
         translated = model.generate(**encoded_input)
-        translated_input = tokenizer.batch_decode(translated, skip_special_tokens=True)
-        return translated_input
+        return tokenizer.batch_decode(translated, skip_special_tokens=True)
 
     def _get_transformations(self, current_text, indices_to_modify):
-        transformed_texts = []
         current_text = current_text.text
 
         # to perform chained back translation, a random list of target languages are selected from the provided model
@@ -109,8 +107,7 @@ class BackTranslation(SentenceTransformation):
         src_language_text = self.translate(
             target_language_text, self.src_model, self.src_tokenizer, self.src_lang
         )
-        transformed_texts.append(AttackedText(src_language_text[0]))
-        return transformed_texts
+        return [AttackedText(src_language_text[0])]
 
 
 """

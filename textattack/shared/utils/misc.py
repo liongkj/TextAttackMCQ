@@ -20,21 +20,19 @@ def html_style_from_dict(style_dict):
     into
         style: "color: red; height: 100px"
     """
-    style_str = ""
-    for key in style_dict:
-        style_str += key + ": " + style_dict[key] + ";"
-    return 'style="{}"'.format(style_str)
+    style_str = "".join(f"{key}: {style_dict[key]};" for key in style_dict)
+    return f'style="{style_str}"'
 
 
 def html_table_from_rows(rows, title=None, header=None, style_dict=None):
     # Stylize the container div.
     if style_dict:
-        table_html = "<div {}>".format(html_style_from_dict(style_dict))
+        table_html = f"<div {html_style_from_dict(style_dict)}>"
     else:
         table_html = "<div>"
     # Print the title string.
     if title:
-        table_html += "<h1>{}</h1>".format(title)
+        table_html += f"<h1>{title}</h1>"
 
     # Construct each row as HTML.
     table_html = '<table class="table">'

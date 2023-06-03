@@ -50,23 +50,19 @@ class USEMetric(Metric):
 
         self.results = results
 
-        for i, result in enumerate(self.results):
-            if isinstance(result, FailedAttackResult):
-                continue
-            elif isinstance(result, SkippedAttackResult):
-                continue
-            else:
+        for result in self.results:
+            if not isinstance(result, FailedAttackResult) and not isinstance(
+                result, SkippedAttackResult
+            ):
                 self.original_candidates.append(result.original_result.attacked_text)
                 self.successful_candidates.append(result.perturbed_result.attacked_text)
 
-        use_scores = []
-        for c in range(len(self.original_candidates)):
-            use_scores.append(
-                self.use_obj._sim_score(
-                    self.original_candidates[c], self.successful_candidates[c]
-                ).item()
-            )
-
+        use_scores = [
+            self.use_obj._sim_score(
+                self.original_candidates[c], self.successful_candidates[c]
+            ).item()
+            for c in range(len(self.original_candidates))
+        ]
         self.all_metrics["avg_attack_use_score"] = round(
             sum(use_scores) / len(use_scores), 2
         )

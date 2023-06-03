@@ -279,10 +279,10 @@ class ModelArgs:
                 with open(os.path.join(args.model, "config.json")) as f:
                     config = json.load(f)
                 model_class = config["architectures"]
-                if (
-                    model_class == "LSTMForClassification"
-                    or model_class == "WordCNNForClassification"
-                ):
+                if model_class in [
+                    "LSTMForClassification",
+                    "WordCNNForClassification",
+                ]:
                     model = eval(
                         f"textattack.models.helpers.{model_class}.from_pretrained({args.model})"
                     )

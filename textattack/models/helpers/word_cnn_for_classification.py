@@ -125,8 +125,7 @@ class WordCNNForClassification(nn.Module):
         output = self.encoder(emb)
 
         output = self.drop(output)
-        pred = self.out(output)
-        return pred
+        return self.out(output)
 
     def get_input_embeddings(self):
         return self.emb_layer.embedding

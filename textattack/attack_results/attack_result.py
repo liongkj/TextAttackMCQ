@@ -76,7 +76,7 @@ class AttackResult(ABC):
         """Returns a string illustrating the results of the goal function."""
         orig_colored = self.original_result.get_colored_output(color_method)
         pert_colored = self.perturbed_result.get_colored_output(color_method)
-        return orig_colored + " --> " + pert_colored
+        return f"{orig_colored} --> {pert_colored}"
 
     def diff_color(self, color_method=None):
         """Highlights the difference between two texts using color.
@@ -88,7 +88,7 @@ class AttackResult(ABC):
         t1 = self.original_result.attacked_text
         t2 = self.perturbed_result.attacked_text
 
-        if detect(t1.text) == "zh-cn" or detect(t1.text) == "ko":
+        if detect(t1.text) in ["zh-cn", "ko"]:
             return t1.printable_text(), t2.printable_text()
 
         if color_method is None:

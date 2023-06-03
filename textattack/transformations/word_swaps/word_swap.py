@@ -44,11 +44,11 @@ class WordSwap(Transformation):
         for i in indices_to_modify:
             word_to_replace = words[i]
             replacement_words = self._get_replacement_words(word_to_replace)
-            transformed_texts_idx = []
-            for r in replacement_words:
-                if r == word_to_replace:
-                    continue
-                transformed_texts_idx.append(current_text.replace_word_at_index(i, r))
+            transformed_texts_idx = [
+                current_text.replace_word_at_index(i, r)
+                for r in replacement_words
+                if r != word_to_replace
+            ]
             transformed_texts.extend(transformed_texts_idx)
 
         return transformed_texts

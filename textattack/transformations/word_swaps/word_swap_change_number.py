@@ -55,7 +55,7 @@ class WordSwapChangeNumber(WordSwap):
             for number in STR_NUM:
                 if number in word:
                     if word in ["point", "and"]:
-                        if 0 < idx and (idx - 1) in num_idx:
+                        if idx > 0 and (idx - 1) in num_idx:
                             num_idx.append(idx)
                     else:
                         num_idx.append(idx)
@@ -78,7 +78,7 @@ class WordSwapChangeNumber(WordSwap):
                 text = current_text.replace_word_at_index(idx[0], str(r))
                 if len(idx) > 1:
                     index = idx[1]
-                    for i in idx[1:]:
+                    for _ in idx[1:]:
                         text = text.delete_word_at_index(index)
                 transformed_texts.append(text)
         return transformed_texts
@@ -104,11 +104,11 @@ class WordSwapChangeNumber(WordSwap):
         random number within the range of self.max_change."""
         if num not in [0, 2, 4]:
             change = int(num * self.max_change) + 1
-            if num >= 0:
-                num_list = np.random.randint(max(num - change, 1), num + change, self.n)
-            else:
-                num_list = np.random.randint(num - change, min(0, num + change), self.n)
-            return num_list
+            return (
+                np.random.randint(max(num - change, 1), num + change, self.n)
+                if num >= 0
+                else np.random.randint(num - change, min(0, num + change), self.n)
+            )
         return []
 
 

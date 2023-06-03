@@ -17,9 +17,7 @@ def port_is_open(port_num, hostname="127.0.0.1"):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     result = sock.connect_ex((hostname, port_num))
     sock.close()
-    if result == 0:
-        return True
-    return False
+    return result == 0
 
 
 class VisdomLogger(Logger):
@@ -36,8 +34,7 @@ class VisdomLogger(Logger):
         self.sample_rows = []
 
     def __getstate__(self):
-        state = {i: self.__dict__[i] for i in self.__dict__ if i != "vis"}
-        return state
+        return {i: self.__dict__[i] for i in self.__dict__ if i != "vis"}
 
     def __setstate__(self, state):
         self.__dict__ = state

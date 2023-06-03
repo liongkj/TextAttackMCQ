@@ -53,10 +53,7 @@ class MinimizeBleu(TextToTextGoalFunction):
         return 1.0 - bleu_score
 
     def extra_repr_keys(self):
-        if self.maximizable:
-            return ["maximizable"]
-        else:
-            return ["maximizable", "target_bleu"]
+        return ["maximizable"] if self.maximizable else ["maximizable", "target_bleu"]
 
 
 @functools.lru_cache(maxsize=2**12)

@@ -74,8 +74,10 @@ class PartOfSpeech(Constraint):
         self._pos_tag_cache.clear()
 
     def _can_replace_pos(self, pos_a, pos_b):
-        return (pos_a == pos_b) or (
-            self.allow_verb_noun_swap and set([pos_a, pos_b]) <= set(["NOUN", "VERB"])
+        return (
+            pos_a == pos_b
+            or self.allow_verb_noun_swap
+            and {pos_a, pos_b} <= {"NOUN", "VERB"}
         )
 
     def _get_pos(self, before_ctx, word, after_ctx):

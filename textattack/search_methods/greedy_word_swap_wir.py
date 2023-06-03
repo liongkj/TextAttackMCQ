@@ -109,13 +109,12 @@ class GreedyWordSwapWIR(SearchMethod):
             gradient = grad_output["gradient"]
             word2token_mapping = initial_text.align_with_model_tokens(victim_model)
             for i, index in enumerate(indices_to_order):
-                matched_tokens = word2token_mapping[index]
-                if not matched_tokens:
-                    index_scores[i] = 0.0
-                else:
+                if matched_tokens := word2token_mapping[index]:
                     agg_grad = np.mean(gradient[matched_tokens], axis=0)
                     index_scores[i] = np.linalg.norm(agg_grad, ord=1)
 
+                else:
+                    index_scores[i] = 0.0
             search_over = False
 
         elif self.wir_method == "random":
@@ -185,10 +184,7 @@ class GreedyWordSwapWIR(SearchMethod):
 
     @property
     def is_black_box(self):
-        if self.wir_method == "gradient":
-            return False
-        else:
-            return True
+        return self.wir_method != "gradient"
 
     def extra_repr_keys(self):
         return ["wir_method"]

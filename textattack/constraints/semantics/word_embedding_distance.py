@@ -117,10 +117,7 @@ class WordEmbeddingDistance(Constraint):
         this method in your own constraint. Both single-line and multi-
         line strings are acceptable.
         """
-        if self.min_cos_sim is None:
-            metric = "max_mse_dist"
-        else:
-            metric = "min_cos_sim"
+        metric = "max_mse_dist" if self.min_cos_sim is None else "min_cos_sim"
         return [
             "embedding",
             metric,

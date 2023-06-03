@@ -18,9 +18,7 @@ class CompositeTransformation(Transformation):
     """
 
     def __init__(self, transformations):
-        if not (
-            isinstance(transformations, list) or isinstance(transformations, tuple)
-        ):
+        if not (isinstance(transformations, (list, tuple))):
             raise TypeError("transformations must be list or tuple")
         elif not len(transformations):
             raise ValueError("transformations cannot be empty")
@@ -41,9 +39,10 @@ class CompositeTransformation(Transformation):
 
     def __repr__(self):
         main_str = "CompositeTransformation" + "("
-        transformation_lines = []
-        for i, transformation in enumerate(self.transformations):
-            transformation_lines.append(utils.add_indent(f"({i}): {transformation}", 2))
+        transformation_lines = [
+            utils.add_indent(f"({i}): {transformation}", 2)
+            for i, transformation in enumerate(self.transformations)
+        ]
         transformation_lines.append(")")
         main_str += utils.add_indent("\n" + "\n".join(transformation_lines), 2)
         return main_str

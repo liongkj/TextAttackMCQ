@@ -116,12 +116,10 @@ def test_high_yield_fast_augment():
         >= len(augmented_text_list_fa)
         >= len(augmented_text_list)
     )
-    check2 = True
-    for augmented_text in augmented_text_list:
-        if augmented_text not in augmented_text_list_hy:
-            check2 = False
-            break
-
+    check2 = all(
+        augmented_text in augmented_text_list_hy
+        for augmented_text in augmented_text_list
+    )
     assert check1 and check2
 
 

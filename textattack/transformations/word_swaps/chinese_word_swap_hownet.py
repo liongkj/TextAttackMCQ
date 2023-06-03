@@ -16,9 +16,11 @@ class ChineseWordSwapHowNet(WordSwap):
         replaced by a homoglyph."""
         if self.hownet_dict.get(word):
             results = self.hownet_dict.get_nearest_words_via_sememes(word, self.topk)
-            synonyms = [
-                w["word"] for r in results for w in r["synset"] if w["word"] != word
+            return [
+                w["word"]
+                for r in results
+                for w in r["synset"]
+                if w["word"] != word
             ]
-            return synonyms
         else:
             return []

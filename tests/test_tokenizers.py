@@ -42,8 +42,7 @@ def glove_tokenizer():
 
 @pytest.fixture
 def lstm():
-    lstm = textattack.models.helpers.LSTMForClassification()
-    return lstm
+    return textattack.models.helpers.LSTMForClassification()
 
 
 # Disable formatting so that the samples don't wrap over thousands of lines

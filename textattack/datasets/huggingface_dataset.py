@@ -37,9 +37,6 @@ def get_datasets_dataset_columns(dataset):
     elif {"question1", "question2", "label"} <= schema:
         input_columns = ("question1", "question2")
         output_column = "label"
-    elif {"question", "sentence", "label"} <= schema:
-        input_columns = ("question", "sentence")
-        output_column = "label"
     elif {"context", "question", "title", "answers"} <= schema:
         # Common schema for SQUAD dataset
         input_columns = ("title", "context", "question")

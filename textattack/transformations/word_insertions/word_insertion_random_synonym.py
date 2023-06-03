@@ -47,7 +47,4 @@ class WordInsertionRandomSynonym(WordInsertion):
 
 
 def check_if_one_word(word):
-    for c in word:
-        if not c.isalpha():
-            return False
-    return True
+    return all(c.isalpha() for c in word)

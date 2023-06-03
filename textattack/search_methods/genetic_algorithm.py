@@ -156,10 +156,9 @@ class GeneticAlgorithm(PopulationBasedSearch, ABC):
                 if "last_transformation" in parent_text1.attack_attrs
                 else parent_text2
             )
-            passed_constraints = self._check_constraints(
+            return self._check_constraints(
                 new_text, previous_text, original_text=original_text
             )
-            return passed_constraints
         else:
             # `new_text` has not been actually transformed, so return True
             return True
@@ -209,15 +208,11 @@ class GeneticAlgorithm(PopulationBasedSearch, ABC):
             num_tries += 1
 
         if self.post_crossover_check and not passed_constraints:
-            # If we cannot find a child that passes the constraints,
-            # we just randomly pick one of the parents to be the child for the next iteration.
-            pop_mem = pop_member1 if np.random.uniform() < 0.5 else pop_member2
-            return pop_mem
-        else:
-            new_results, self._search_over = self.get_goal_results([new_text])
-            return PopulationMember(
-                new_text, result=new_results[0], attributes=attributes
-            )
+            return pop_member1 if np.random.uniform() < 0.5 else pop_member2
+        new_results, self._search_over = self.get_goal_results([new_text])
+        return PopulationMember(
+            new_text, result=new_results[0], attributes=attributes
+        )
 
     @abstractmethod
     def _initialize_population(self, initial_result, pop_size):
@@ -237,7 +232,7 @@ class GeneticAlgorithm(PopulationBasedSearch, ABC):
         pop_size = len(population)
         current_score = initial_result.score
 
-        for i in range(self.max_iters):
+        for _ in range(self.max_iters):
             population = sorted(population, key=lambda x: x.result.score, reverse=True)
 
             if (

@@ -31,10 +31,7 @@ class AttackLogManager:
         self.loggers = []
         self.results = []
         self.enable_advance_metrics = False
-        if metrics is None:
-            self.metrics = {}
-        else:
-            self.metrics = metrics
+        self.metrics = {} if metrics is None else metrics
 
     def enable_stdout(self):
         self.loggers.append(FileLogger(stdout=True))
@@ -109,7 +106,10 @@ class AttackLogManager:
                 attack_success_stats["successful_attacks"],
             ],
             ["Number of failed attacks:", attack_success_stats["failed_attacks"]],
-            ["Number of skipped attacks:", attack_success_stats["skipped_attacks"]],
+            [
+                "Number of skipped attacks:",
+                attack_success_stats["skipped_attacks"],
+            ],
             [
                 "Original accuracy:",
                 str(attack_success_stats["original_accuracy"]) + "%",
@@ -130,36 +130,33 @@ class AttackLogManager:
                 "Average num. words per input:",
                 words_perturbed_stats["avg_word_perturbed"],
             ],
+            ["Avg num queries:", attack_query_stats["avg_num_queries"]],
         ]
 
-        summary_table_rows.append(
-            ["Avg num queries:", attack_query_stats["avg_num_queries"]]
+        summary_table_rows.extend(
+            [metric_name, metric.calculate(self.results)]
+            for metric_name, metric in self.metrics.items()
         )
-
-        for metric_name, metric in self.metrics.items():
-            summary_table_rows.append([metric_name, metric.calculate(self.results)])
-
         if self.enable_advance_metrics:
             perplexity_stats = Perplexity().calculate(self.results)
             use_stats = USEMetric().calculate(self.results)
 
-            summary_table_rows.append(
-                [
-                    "Average Original Perplexity:",
-                    perplexity_stats["avg_original_perplexity"],
-                ]
+            summary_table_rows.extend(
+                (
+                    [
+                        "Average Original Perplexity:",
+                        perplexity_stats["avg_original_perplexity"],
+                    ],
+                    [
+                        "Average Attack Perplexity:",
+                        perplexity_stats["avg_attack_perplexity"],
+                    ],
+                    [
+                        "Average Attack USE Score:",
+                        use_stats["avg_attack_use_score"],
+                    ],
+                )
             )
-
-            summary_table_rows.append(
-                [
-                    "Average Attack Perplexity:",
-                    perplexity_stats["avg_attack_perplexity"],
-                ]
-            )
-            summary_table_rows.append(
-                ["Average Attack USE Score:", use_stats["avg_attack_use_score"]]
-            )
-
         self.log_summary_rows(
             summary_table_rows, "Attack Results", "attack_results_summary"
         )

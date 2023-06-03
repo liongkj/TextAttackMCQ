@@ -50,7 +50,7 @@ class WordSwapChangeLocation(WordSwap):
         location_idx = []
         if self.language == "en":
             model_name = "ner"
-        elif self.language == "fra" or self.language == "french":
+        elif self.language in ["fra", "french"]:
             model_name = "flair/ner-french"
         else:
             model_name = "flair/ner-multi-fast"
@@ -77,7 +77,7 @@ class WordSwapChangeLocation(WordSwap):
                 # if original location is more than a single word, remain only the starting word
                 if len(idx) > 1:
                     index = idx[1]
-                    for i in idx[1:]:
+                    for _ in idx[1:]:
                         text = text.delete_word_at_index(index)
 
                 # replace the starting word with new location
@@ -90,14 +90,14 @@ class WordSwapChangeLocation(WordSwap):
         """Return a list of new locations, with the choice of country,
         nationality, and city."""
         language = ""
-        if self.language == "esp" or self.language == "spanish":
+        if self.language in ["esp", "spanish"]:
             language = "-spanish"
-        elif self.language == "fra" or self.language == "french":
+        elif self.language in ["fra", "french"]:
             language = "-french"
-        if word in NAMED_ENTITIES["country" + language]:
-            return np.random.choice(NAMED_ENTITIES["country" + language], self.n)
-        elif word in NAMED_ENTITIES["nationality" + language]:
-            return np.random.choice(NAMED_ENTITIES["nationality" + language], self.n)
+        if word in NAMED_ENTITIES[f"country{language}"]:
+            return np.random.choice(NAMED_ENTITIES[f"country{language}"], self.n)
+        elif word in NAMED_ENTITIES[f"nationality{language}"]:
+            return np.random.choice(NAMED_ENTITIES[f"nationality{language}"], self.n)
         elif word in NAMED_ENTITIES["city"]:
             return np.random.choice(NAMED_ENTITIES["city"], self.n)
         return []

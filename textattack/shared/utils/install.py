@@ -23,7 +23,7 @@ def path_in_cache(file_path):
 
 
 def s3_url(uri):
-    return "https://textattack.s3.amazonaws.com/" + uri
+    return f"https://textattack.s3.amazonaws.com/{uri}"
 
 
 def download_from_s3(folder_name, skip_if_cached=True):
@@ -40,7 +40,7 @@ def download_from_s3(folder_name, skip_if_cached=True):
     cache_dest_path = path_in_cache(folder_name)
     os.makedirs(os.path.dirname(cache_dest_path), exist_ok=True)
     # Use a lock to prevent concurrent downloads.
-    cache_dest_lock_path = cache_dest_path + ".lock"
+    cache_dest_lock_path = f"{cache_dest_path}.lock"
     cache_file_lock = filelock.FileLock(cache_dest_lock_path)
     cache_file_lock.acquire()
     # Check if already downloaded.
@@ -83,7 +83,7 @@ def download_from_url(url, save_path, skip_if_cached=True):
     cache_dest_path = path_in_cache(save_path)
     os.makedirs(os.path.dirname(cache_dest_path), exist_ok=True)
     # Use a lock to prevent concurrent downloads.
-    cache_dest_lock_path = cache_dest_path + ".lock"
+    cache_dest_lock_path = f"{cache_dest_path}.lock"
     cache_file_lock = filelock.FileLock(cache_dest_lock_path)
     cache_file_lock.acquire()
     # Check if already downloaded.
@@ -126,7 +126,7 @@ def http_get(url, out_file, proxies=None):
     req = requests.get(url, stream=True, proxies=proxies)
     content_length = req.headers.get("Content-Length")
     total = int(content_length) if content_length is not None else None
-    if req.status_code == 403 or req.status_code == 404:
+    if req.status_code in {403, 404}:
         raise Exception(f"Could not reach {url}.")
     progress = tqdm.tqdm(unit="B", unit_scale=True, total=total)
     for chunk in req.iter_content(chunk_size=1024):
@@ -187,7 +187,7 @@ def _post_install_if_needed():
     """Runs _post_install if hasn't been run since install."""
     # Check for post-install file.
     post_install_file_path = path_in_cache("post_install_check_3")
-    post_install_file_lock_path = post_install_file_path + ".lock"
+    post_install_file_lock_path = f"{post_install_file_path}.lock"
     post_install_file_lock = filelock.FileLock(post_install_file_lock_path)
     post_install_file_lock.acquire()
     if os.path.exists(post_install_file_path):

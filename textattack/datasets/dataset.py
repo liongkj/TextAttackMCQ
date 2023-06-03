@@ -101,13 +101,13 @@ class Dataset(torch.utils.data.Dataset):
                     "Mismatch between the number of columns in `input_columns` and number of columns of actual input."
                 )
             input_dict = OrderedDict([(self.input_columns[0], example[0])])
-        else:
-            if len(self.input_columns) != len(example[0]):
-                raise ValueError(
-                    "Mismatch between the number of columns in `input_columns` and number of columns of actual input."
-                )
+        elif len(self.input_columns) == len(example[0]):
             input_dict = OrderedDict(
                 [(c, example[0][i]) for i, c in enumerate(self.input_columns)]
+            )
+        else:
+            raise ValueError(
+                "Mismatch between the number of columns in `input_columns` and number of columns of actual input."
             )
         return input_dict, output
 

@@ -69,10 +69,7 @@ class WordSwapQWERTY(WordSwap):
         s_lower = s.lower()
         if s_lower in self._keyboard_adjacency:
             adjacent_keys = self._keyboard_adjacency.get(s_lower, [])
-            if s.isupper():
-                return [key.upper() for key in adjacent_keys]
-            else:
-                return adjacent_keys
+            return [key.upper() for key in adjacent_keys] if s.isupper() else adjacent_keys
         else:
             return []
 
@@ -96,10 +93,10 @@ class WordSwapQWERTY(WordSwap):
             candidate_words.append(candidate_word)
         else:
             for i in range(start_idx, end_idx + 1):
-                for swap_key in self._get_adjacent(word[i]):
-                    candidate_word = word[:i] + swap_key + word[i + 1 :]
-                    candidate_words.append(candidate_word)
-
+                candidate_words.extend(
+                    word[:i] + swap_key + word[i + 1 :]
+                    for swap_key in self._get_adjacent(word[i])
+                )
         return candidate_words
 
     @property

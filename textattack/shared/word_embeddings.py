@@ -285,9 +285,7 @@ class WordEmbedding(AbstractWordEmbedding):
         # loading the files
         embedding_matrix = np.load(word_embeddings_file)
         word2index = np.load(word_list_file, allow_pickle=True)
-        index2word = {}
-        for word, index in word2index.items():
-            index2word[index] = word
+        index2word = {index: word for word, index in word2index.items()}
         nn_matrix = np.load(nn_matrix_file)
 
         embedding = WordEmbedding(embedding_matrix, word2index, index2word, nn_matrix)
@@ -407,8 +405,7 @@ class GensimWordEmbedding(AbstractWordEmbedding):
             a = self.keyed_vectors.index_to_key[a]
         if not isinstance(b, str):
             b = self.keyed_vectors.index_to_key[b]
-        cos_sim = self.keyed_vectors.similarity(a, b)
-        return cos_sim
+        return self.keyed_vectors.similarity(a, b)
 
     def nearest_neighbours(self, index, topn, return_words=True):
         """

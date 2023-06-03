@@ -110,12 +110,12 @@ class WordSwapGradientBased(WordSwap):
         If indices_to_replace is set, only replaces words at those
         indices.
         """
-        transformations = []
-        for word, idx in self._get_replacement_words_by_grad(
-            attacked_text, indices_to_replace
-        ):
-            transformations.append(attacked_text.replace_word_at_index(idx, word))
-        return transformations
+        return [
+            attacked_text.replace_word_at_index(idx, word)
+            for word, idx in self._get_replacement_words_by_grad(
+                attacked_text, indices_to_replace
+            )
+        ]
 
     def extra_repr_keys(self):
         return ["top_n"]

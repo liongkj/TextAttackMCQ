@@ -79,7 +79,7 @@ class WordSwapInflections(WordSwap):
         ).values()
 
         # merge tuples, remove duplicates, remove copy of the original word
-        replacement_words = list(set([infl for tup in inflections for infl in tup]))
+        replacement_words = list({infl for tup in inflections for infl in tup})
         replacement_words = [r for r in replacement_words if r != word]
 
         return replacement_words
@@ -92,7 +92,7 @@ class WordSwapInflections(WordSwap):
             replacement_words = (
                 self._get_replacement_words(word_to_replace, word_to_replace_pos) or []
             )
-            for r in replacement_words:
-                transformed_texts.append(current_text.replace_word_at_index(i, r))
-
+            transformed_texts.extend(
+                current_text.replace_word_at_index(i, r) for r in replacement_words
+            )
         return transformed_texts

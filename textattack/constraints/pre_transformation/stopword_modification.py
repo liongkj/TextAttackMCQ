@@ -23,11 +23,11 @@ class StopwordModification(PreTransformationConstraint):
     def _get_modifiable_indices(self, current_text):
         """Returns the word indices in ``current_text`` which are able to be
         modified."""
-        non_stopword_indices = set()
-        for i, word in enumerate(current_text.words):
-            if word not in self.stopwords:
-                non_stopword_indices.add(i)
-        return non_stopword_indices
+        return {
+            i
+            for i, word in enumerate(current_text.words)
+            if word not in self.stopwords
+        }
 
     def check_compatibility(self, transformation):
         """The stopword constraint only is concerned with word swaps since

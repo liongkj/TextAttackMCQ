@@ -23,8 +23,7 @@ def add_indent(s_, numSpaces):
     first = s.pop(0)
     s = [(numSpaces * " ") + line for line in s]
     s = "\n".join(s)
-    s = first + "\n" + s
-    return s
+    return first + "\n" + s
 
 
 def words_from_text(s, words_to_ignore=[]):
@@ -44,8 +43,7 @@ def words_from_text(s, words_to_ignore=[]):
         word = word.lstrip(exceptions)
         filt = [w.lstrip(exceptions) for w in re.findall(filter_pattern, word)]
         words.extend(filt)
-    words = list(filter(lambda w: w not in words_to_ignore + [""], words))
-    return words
+    return list(filter(lambda w: w not in words_to_ignore + [""], words))
 
 
 class TextAttackFlairTokenizer(flair.data.Tokenizer):
@@ -55,9 +53,9 @@ class TextAttackFlairTokenizer(flair.data.Tokenizer):
 
 def default_class_repr(self):
     if hasattr(self, "extra_repr_keys"):
-        extra_params = []
-        for key in self.extra_repr_keys():
-            extra_params.append("  (" + key + ")" + ":  {" + key + "}")
+        extra_params = [
+            f"  ({key})" + ":  {" + key + "}" for key in self.extra_repr_keys()
+        ]
         if len(extra_params):
             extra_str = "\n" + "\n".join(extra_params) + "\n"
             extra_str = f"({extra_str})"
@@ -161,7 +159,7 @@ class ANSI_ESCAPE_CODES:
 
 
 def color_text(text, color=None, method=None):
-    if not (isinstance(color, str) or isinstance(color, tuple)):
+    if not (isinstance(color, (str, tuple))):
         raise TypeError(f"Cannot color text with provided color of type {type(color)}")
     if isinstance(color, tuple):
         if len(color) > 1:
@@ -204,7 +202,7 @@ def color_text(text, color=None, method=None):
 
         return color + text + ANSI_ESCAPE_CODES.STOP
     elif method == "file":
-        return "[[" + text + "]]"
+        return f"[[{text}]]"
 
 
 _flair_pos_tagger = None
@@ -291,14 +289,11 @@ def check_if_subword(token, model_type, starting=False):
             f"Model type {model_type} is not available. Options are {avail_models}."
         )
     if model_type in ["bert", "electra"]:
-        return True if "##" in token else False
+        return "##" in token
     elif model_type in ["gpt", "gpt2", "roberta", "bart", "longformer"]:
-        if starting:
-            return False
-        else:
-            return False if token[0] == "Ġ" else True
+        return False if starting else token[0] != "Ġ"
     elif model_type == "xlnet":
-        return False if token[0] == "_" else True
+        return token[0] != "_"
     else:
         return False
 
@@ -329,17 +324,11 @@ def strip_BPE_artifacts(token, model_type):
     elif model_type in ["gpt", "gpt2", "roberta", "bart", "longformer"]:
         return token.replace("Ġ", "")
     elif model_type == "xlnet":
-        if len(token) > 1 and token[0] == "_":
-            return token[1:]
-        else:
-            return token
+        return token[1:] if len(token) > 1 and token[0] == "_" else token
     else:
         return token
 
 
 def check_if_punctuations(word):
     """Returns ``True`` if ``word`` is just a sequence of punctuations."""
-    for c in word:
-        if c not in string.punctuation:
-            return False
-    return True
+    return all(c in string.punctuation for c in word)

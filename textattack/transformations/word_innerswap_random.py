@@ -16,10 +16,9 @@ class WordInnerSwapRandom(Transformation):
         transformed_texts = []
         words = current_text.words
         for idx in indices_to_modify:
-            word = words[idx]
-            swap_idxs = list(set(range(len(words))) - {idx})
-            if swap_idxs:
+            if swap_idxs := list(set(range(len(words))) - {idx}):
                 swap_idx = random.choice(swap_idxs)
+                word = words[idx]
                 swapped_text = current_text.replace_word_at_index(
                     idx, words[swap_idx]
                 ).replace_word_at_index(swap_idx, word)

@@ -49,12 +49,10 @@ class MeteorMetric(Metric):
 
         self.results = results
 
-        for i, result in enumerate(self.results):
-            if isinstance(result, FailedAttackResult):
-                continue
-            elif isinstance(result, SkippedAttackResult):
-                continue
-            else:
+        for result in self.results:
+            if not isinstance(result, FailedAttackResult) and not isinstance(
+                result, SkippedAttackResult
+            ):
                 self.original_candidates.append(
                     result.original_result.attacked_text.text
                 )
@@ -62,15 +60,13 @@ class MeteorMetric(Metric):
                     result.perturbed_result.attacked_text.text
                 )
 
-        meteor_scores = []
-        for c in range(len(self.original_candidates)):
-            meteor_scores.append(
-                nltk.translate.meteor(
-                    [nltk.word_tokenize(self.original_candidates[c])],
-                    nltk.word_tokenize(self.successful_candidates[c]),
-                )
+        meteor_scores = [
+            nltk.translate.meteor(
+                [nltk.word_tokenize(self.original_candidates[c])],
+                nltk.word_tokenize(self.successful_candidates[c]),
             )
-
+            for c in range(len(self.original_candidates))
+        ]
         self.all_metrics["avg_attack_meteor_score"] = round(
             sum(meteor_scores) / len(meteor_scores), 2
         )

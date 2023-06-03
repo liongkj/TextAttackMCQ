@@ -36,11 +36,9 @@ class WordInsertion(Transformation):
         for i in indices_to_modify:
             new_words = self._get_new_words(current_text, i)
 
-            new_transformted_texts = []
-            for w in new_words:
-                new_transformted_texts.append(
-                    current_text.insert_text_before_word_index(i, w)
-                )
+            new_transformted_texts = [
+                current_text.insert_text_before_word_index(i, w) for w in new_words
+            ]
             transformed_texts.extend(new_transformted_texts)
 
         return transformed_texts

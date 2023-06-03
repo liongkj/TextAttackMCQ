@@ -47,7 +47,7 @@ class WordSwapChangeName(WordSwap):
         transformed_texts = []
         if self.language == "en":
             model_name = "ner"
-        elif self.language == "fra" or self.language == "french":
+        elif self.language in ["fra", "french"]:
             model_name = "flair/ner-french"
         else:
             model_name = "flair/ner-multi-fast"
@@ -58,9 +58,9 @@ class WordSwapChangeName(WordSwap):
             replacement_words = self._get_replacement_words(
                 word_to_replace, word_to_replace_ner
             )
-            for r in replacement_words:
-                transformed_texts.append(current_text.replace_word_at_index(i, r))
-
+            transformed_texts.extend(
+                current_text.replace_word_at_index(i, r) for r in replacement_words
+            )
         return transformed_texts
 
     def _get_replacement_words(self, word, word_part_of_speech):
@@ -83,11 +83,11 @@ class WordSwapChangeName(WordSwap):
 
     def _get_lastname(self, word):
         """Return a list of random last names."""
-        if self.language == "esp" or self.language == "spanish":
+        if self.language in ["esp", "spanish"]:
             return np.random.choice(
                 PERSON_NAMES["last-spanish"], self.num_name_replacements
             )
-        elif self.language == "fra" or self.language == "french":
+        elif self.language in ["fra", "french"]:
             return np.random.choice(
                 PERSON_NAMES["last-french"], self.num_name_replacements
             )
@@ -96,11 +96,11 @@ class WordSwapChangeName(WordSwap):
 
     def _get_firstname(self, word):
         """Return a list of random first names."""
-        if self.language == "esp" or self.language == "spanish":
+        if self.language in ["esp", "spanish"]:
             return np.random.choice(
                 PERSON_NAMES["first-spanish"], self.num_name_replacements
             )
-        elif self.language == "fra" or self.language == "french":
+        elif self.language in ["fra", "french"]:
             return np.random.choice(
                 PERSON_NAMES["first-french"], self.num_name_replacements
             )

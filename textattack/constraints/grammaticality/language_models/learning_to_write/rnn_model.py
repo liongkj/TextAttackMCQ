@@ -99,11 +99,7 @@ class RNNModel(nn.Module):
 
         output = output.view(output.size(0) * output.size(1), output.size(2))
 
-        if self.full:
-            decode = self.softmax.log_prob(output)
-        else:
-            decode = self.softmax(output)
-
+        decode = self.softmax.log_prob(output) if self.full else self.softmax(output)
         return decode, hidden
 
     def init_hidden(self, bsz):

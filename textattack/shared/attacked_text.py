@@ -61,9 +61,9 @@ class AttackedText:
         self._pos_tags = None
         self._ner_tags = None
         # Format text inputs.
-        self._text_input = OrderedDict([(k, v) for k, v in self._text_input.items()])
+        self._text_input = OrderedDict(list(self._text_input.items()))
         if attack_attrs is None:
-            self.attack_attrs = dict()
+            self.attack_attrs = {}
         elif isinstance(attack_attrs, dict):
             self.attack_attrs = attack_attrs
         else:
@@ -84,9 +84,7 @@ class AttackedText:
         """
         if not (self.text == other.text):
             return False
-        if len(self.attack_attrs) != len(other.attack_attrs):
-            return False
-        return True
+        return len(self.attack_attrs) == len(other.attack_attrs)
 
     def __hash__(self) -> int:
         return hash(self.text)
@@ -149,9 +147,8 @@ class AttackedText:
             word_idx_in_flair_tags = flair_word_list.index(word)
             if word_idx == desired_word_idx:
                 return flair_pos_list[word_idx_in_flair_tags]
-            else:
-                flair_word_list = flair_word_list[word_idx_in_flair_tags + 1 :]
-                flair_pos_list = flair_pos_list[word_idx_in_flair_tags + 1 :]
+            flair_word_list = flair_word_list[word_idx_in_flair_tags + 1 :]
+            flair_pos_list = flair_pos_list[word_idx_in_flair_tags + 1 :]
 
         raise ValueError(
             f"Did not find word from index {desired_word_idx} in flair POS tag"
@@ -179,9 +176,8 @@ class AttackedText:
             word_idx_in_flair_tags = flair_word_list.index(word)
             if word_idx == desired_word_idx:
                 return flair_ner_list[word_idx_in_flair_tags]
-            else:
-                flair_word_list = flair_word_list[word_idx_in_flair_tags + 1 :]
-                flair_ner_list = flair_ner_list[word_idx_in_flair_tags + 1 :]
+            flair_word_list = flair_word_list[word_idx_in_flair_tags + 1 :]
+            flair_ner_list = flair_ner_list[word_idx_in_flair_tags + 1 :]
 
         raise ValueError(
             f"Did not find word from index {desired_word_idx} in flair POS tag"
@@ -219,10 +215,9 @@ class AttackedText:
         """
         w1 = self.words
         w2 = other_attacked_text.words
-        for i in range(min(len(w1), len(w2))):
-            if w1[i] != w2[i]:
-                return w1[i]
-        return None
+        return next(
+            (w1[i] for i in range(min(len(w1), len(w2))) if w1[i] != w2[i]), None
+        )
 
     def first_word_diff_index(self, other_attacked_text: AttackedText) -> Optional[int]:
         """Returns the index of the first word in self.words that differs from
@@ -232,30 +227,21 @@ class AttackedText:
         """
         w1 = self.words
         w2 = other_attacked_text.words
-        for i in range(min(len(w1), len(w2))):
-            if w1[i] != w2[i]:
-                return i
-        return None
+        return next((i for i in range(min(len(w1), len(w2))) if w1[i] != w2[i]), None)
 
     def all_words_diff(self, other_attacked_text: AttackedText) -> Set[int]:
         """Returns the set of indices for which this and other_attacked_text
         have different words."""
-        indices = set()
         w1 = self.words
         w2 = other_attacked_text.words
-        for i in range(min(len(w1), len(w2))):
-            if w1[i] != w2[i]:
-                indices.add(i)
-        return indices
+        return {i for i in range(min(len(w1), len(w2))) if w1[i] != w2[i]}
 
     def ith_word_diff(self, other_attacked_text: AttackedText, i: int) -> bool:
         """Returns bool representing whether the word at index i differs from
         other_attacked_text."""
         w1 = self.words
         w2 = other_attacked_text.words
-        if len(w1) - 1 < i or len(w2) - 1 < i:
-            return True
-        return w1[i] != w2[i]
+        return True if len(w1) - 1 < i or len(w2) - 1 < i else w1[i] != w2[i]
 
     def words_diff_num(self, other_attacked_text: AttackedText) -> int:
         """The number of words different between two AttackedText objects."""
@@ -282,10 +268,7 @@ class AttackedText:
 
             for i in range(1, len(w1_t) + 1):
                 for j in range(1, len(w2_t) + 1):
-                    if w1_t[i - 1] == w2_t[j - 1]:
-                        d = 0
-                    else:
-                        d = 1
+                    d = 0 if w1_t[i - 1] == w2_t[j - 1] else 1
                     matrix[i][j] = min(
                         matrix[i - 1][j] + 1,
                         matrix[i][j - 1] + 1,
@@ -396,7 +379,7 @@ class AttackedText:
         """
         perturbed_text = ""
         original_text = AttackedText.SPLIT_TOKEN.join(self._text_input.values())
-        new_attack_attrs = dict()
+        new_attack_attrs = {}
         if "label_names" in self.attack_attrs:
             new_attack_attrs["label_names"] = self.attack_attrs["label_names"]
         new_attack_attrs["newly_modified_indices"] = set()
@@ -431,8 +414,6 @@ class AttackedText:
                         shifted_modified_indices.add(modified_idx)
                     elif modified_idx > i:
                         shifted_modified_indices.add(modified_idx + num_words_diff)
-                    else:
-                        pass
                 new_attack_attrs["modified_indices"] = shifted_modified_indices
                 # Track insertions and deletions wrt original text.
                 # original_modification_idx = i
@@ -448,24 +429,18 @@ class AttackedText:
 
                 new_attack_attrs["original_index_map"] = new_idx_map
             # Move pointer and save indices of new modified words.
-            for j in range(i, i + adv_num_words):
+            for _ in range(i, i + adv_num_words):
                 if input_word != adv_word_seq:
                     new_attack_attrs["modified_indices"].add(new_i)
                     new_attack_attrs["newly_modified_indices"].add(new_i)
                 new_i += 1
-            # Check spaces for deleted text.
             if adv_num_words == 0 and len(original_text):
-                # Remove extra space (or else there would be two spaces for each
-                # deleted word).
-                # @TODO What to do with punctuation in this case? This behavior is undefined.
                 if i == 0:
                     # If the first word was deleted, take a subsequent space.
                     if original_text[0] == " ":
                         original_text = original_text[1:]
-                else:
-                    # If a word other than the first was deleted, take a preceding space.
-                    if perturbed_text[-1] == " ":
-                        perturbed_text = perturbed_text[:-1]
+                elif perturbed_text[-1] == " ":
+                    perturbed_text = perturbed_text[:-1]
             # Add substitute word(s) to new sentence.
             perturbed_text += adv_word_seq
         perturbed_text += original_text  # Add all of the ending punctuation.
@@ -528,10 +503,7 @@ class AttackedText:
         """The tuple of inputs to be passed to the tokenizer."""
         input_tuple = tuple(self._text_input.values())
         # Prefer to return a string instead of a tuple with a single value.
-        if len(input_tuple) == 1:
-            return input_tuple[0]
-        else:
-            return input_tuple
+        return input_tuple[0] if len(input_tuple) == 1 else input_tuple
 
     @property
     def column_labels(self) -> List[str]:
@@ -585,28 +557,24 @@ class AttackedText:
             hypothesis: ...
             ```
         """
-        # For single-sequence inputs, don't show a prefix.
         if len(self._text_input) == 1:
             return next(iter(self._text_input.values()))
-        # For multiple-sequence inputs, show a prefix and a colon. Optionally,
-        # color the key.
+        if key_color_method:
+
+            def ck(k):
+                return textattack.shared.utils.color_text(
+                    k, key_color, key_color_method
+                )
+
         else:
-            if key_color_method:
 
-                def ck(k):
-                    return textattack.shared.utils.color_text(
-                        k, key_color, key_color_method
-                    )
+            def ck(k):
+                return k
 
-            else:
-
-                def ck(k):
-                    return k
-
-            return "\n".join(
-                f"{ck(key.capitalize())}: {value}"
-                for key, value in self._text_input.items()
-            )
+        return "\n".join(
+            f"{ck(key.capitalize())}: {value}"
+            for key, value in self._text_input.items()
+        )
 
     def __repr__(self) -> str:
         return f'<AttackedText "{self.text}">'

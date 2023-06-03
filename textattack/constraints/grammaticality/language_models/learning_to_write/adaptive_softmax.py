@@ -77,7 +77,7 @@ class AdaptiveLoss(nn.Module):
         super().__init__()
         self.cutoffs = cutoffs
         self.criterions = nn.ModuleList()
-        for i in self.cutoffs:
+        for _ in self.cutoffs:
             self.criterions.append(nn.CrossEntropyLoss(size_average=False))
 
     def reset(self):

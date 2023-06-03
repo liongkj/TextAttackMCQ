@@ -79,10 +79,7 @@ class BERTScore(Constraint):
         """Return `True` if BERT Score between `transformed_text` and
         `reference_text` is lower than minimum BERT Score."""
         score = self._sim_score(reference_text, transformed_text)
-        if score >= self.min_bert_score:
-            return True
-        else:
-            return False
+        return score >= self.min_bert_score
 
     def extra_repr_keys(self):
         return ["min_bert_score", "model", "score_type"] + super().extra_repr_keys()

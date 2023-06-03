@@ -40,9 +40,8 @@ class PeekDatasetCommand(TextAttackCommand):
         outputs = []
         for inputs, output in dataset:
             at = textattack.shared.AttackedText(inputs)
-            if data_all_lowercased:
-                # Test if any of the letters in the string are lowercase.
-                if re.search(UPPERCASE_LETTERS_REGEX, at.text):
+            if re.search(UPPERCASE_LETTERS_REGEX, at.text):
+                if data_all_lowercased:
                     data_all_lowercased = False
             attacked_texts.append(at)
             num_words.append(len(at.words))
@@ -70,7 +69,7 @@ class PeekDatasetCommand(TextAttackCommand):
             print(sorted(set(outputs)))
 
         logger.info("Most common outputs:")
-        for i, (key, value) in enumerate(collections.Counter(outputs).most_common(20)):
+        for key, value in collections.Counter(outputs).most_common(20):
             print("\t", str(key)[:5].ljust(5), f" ({value})")
 
     @staticmethod

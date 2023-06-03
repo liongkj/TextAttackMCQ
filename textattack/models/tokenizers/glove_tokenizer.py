@@ -75,7 +75,7 @@ class WordLevelTokenizer(hf_tokenizers.implementations.BaseTokenizer):
             normalizers += [hf_tokenizers.normalizers.Lowercase()]
 
         # Create the normalizer structure
-        if len(normalizers) > 0:
+        if normalizers:
             if len(normalizers) > 1:
                 tokenizer.normalizer = hf_tokenizers.normalizers.Sequence(normalizers)
             else:
