@@ -10,10 +10,8 @@ from abc import ABC, abstractmethod
 import lru
 import numpy as np
 import torch
-
-from textattack.goal_function_results.goal_function_result import (
-    GoalFunctionResultStatus,
-)
+from textattack.goal_function_results.goal_function_result import \
+    GoalFunctionResultStatus
 from textattack.shared import validators
 from textattack.shared.utils import ReprMixin
 
@@ -59,13 +57,13 @@ class GoalFunction(ReprMixin, ABC):
         if self.use_cache:
             self._call_model_cache.clear()
 
-    def init_attack_example(self, attacked_text, ground_truth_output):
+    def init_attack_example(self, attacked_text, ground_truth_output,options=None):
         """Called before attacking ``attacked_text`` to 'reset' the goal
         function and set properties for this example."""
         self.initial_attacked_text = attacked_text
         self.ground_truth_output = ground_truth_output
         self.num_queries = 0
-        result, _ = self.get_result(attacked_text, check_skip=True)
+        result, _ = self.get_result(attacked_text, check_skip=True,options=options)
         return result, _
 
     def get_output(self, attacked_text):
@@ -80,7 +78,7 @@ class GoalFunction(ReprMixin, ABC):
         result = results[0] if len(results) else None
         return result, search_over
 
-    def get_results(self, attacked_text_list, check_skip=False):
+    def get_results(self, attacked_text_list, check_skip=False,options=None):
         """For each attacked_text object in attacked_text_list, returns a
         result consisting of whether or not the goal has been achieved, the
         output for display purposes, and a score.
@@ -93,7 +91,8 @@ class GoalFunction(ReprMixin, ABC):
             queries_left = self.query_budget - self.num_queries
             attacked_text_list = attacked_text_list[:queries_left]
         self.num_queries += len(attacked_text_list)
-        model_outputs = self._call_model(attacked_text_list)
+        
+        model_outputs = self._call_model(attacked_text_list,options)
         for attacked_text, raw_output in zip(attacked_text_list, model_outputs):
             displayed_output = self._get_displayed_output(raw_output)
             goal_status = self._get_goal_status(
@@ -151,13 +150,24 @@ class GoalFunction(ReprMixin, ABC):
         """
         raise NotImplementedError()
 
-    def _call_model_uncached(self, attacked_text_list):
+    def _call_model_uncached(self, attacked_text_list,options=None):
         """Queries model and returns outputs for a list of AttackedText
         objects."""
         if not len(attacked_text_list):
             return []
-
-        inputs = [at.tokenizer_input for at in attacked_text_list]
+        if options is not None:
+            # generate a list of
+            attacked_text_list_temp=[] 
+            for ctx in attacked_text_list:
+                attacked_text_list_ch = []
+                for op in zip([ctx]*(len(options)-1),list(options.values())[1:]):
+                    attacked_text_list_ch.extend(op)
+                attacked_text_list_temp.append(attacked_text_list_ch)
+            attacked_text_list = attacked_text_list_temp
+        try:
+            inputs = [at.tokenizer_input for at in attacked_text_list]
+        except:
+            inputs = attacked_text_list
         outputs = []
         i = 0
         while i < len(inputs):
@@ -190,18 +200,21 @@ class GoalFunction(ReprMixin, ABC):
 
         return self._process_model_outputs(attacked_text_list, outputs)
 
-    def _call_model(self, attacked_text_list):
+    def _call_model(self, attacked_text_list,options=None):
         """Gets predictions for a list of ``AttackedText`` objects.
 
         Gets prediction from cache if possible. If prediction is not in
         the cache, queries model and stores prediction in cache.
         """
+        attacked_text_list = [a if isinstance(a, str) else a.text for a in attacked_text_list]
+
         if not self.use_cache:
-            return self._call_model_uncached(attacked_text_list)
+            return self._call_model_uncached(attacked_text_list,options)
         else:
             uncached_list = []
             for text in attacked_text_list:
                 if text in self._call_model_cache:
+                    
                     # Re-write value in cache. This moves the key to the top of the
                     # LRU cache and prevents the unlikely event that the text
                     # is overwritten when we store the inputs from `uncached_list`.
@@ -213,7 +226,7 @@ class GoalFunction(ReprMixin, ABC):
                 for text in attacked_text_list
                 if text not in self._call_model_cache
             ]
-            outputs = self._call_model_uncached(uncached_list)
+            outputs = self._call_model_uncached(uncached_list,options)
             for text, output in zip(uncached_list, outputs):
                 self._call_model_cache[text] = output
             all_outputs = [self._call_model_cache[text] for text in attacked_text_list]

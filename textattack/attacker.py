@@ -11,16 +11,13 @@ import queue
 import random
 import traceback
 
+import textattack
 import torch
 import tqdm
-
-import textattack
-from textattack.attack_results import (
-    FailedAttackResult,
-    MaximizedAttackResult,
-    SkippedAttackResult,
-    SuccessfulAttackResult,
-)
+from textattack.attack_results import (FailedAttackResult,
+                                       MaximizedAttackResult,
+                                       SkippedAttackResult,
+                                       SuccessfulAttackResult)
 from textattack.shared.utils import logger
 
 from .attack import Attack
@@ -161,11 +158,14 @@ class Attacker:
                 example, ground_truth_output = self.dataset[idx]
             except IndexError:
                 continue
-            example = textattack.shared.AttackedText(example)
+            ismcq = len(example) > 2
+            if ismcq:
+                options = example
+            example = textattack.shared.AttackedText(example["ctx"] if ismcq else example )
             if self.dataset.label_names is not None:
                 example.attack_attrs["label_names"] = self.dataset.label_names
             try:
-                result = self.attack.attack(example, ground_truth_output)
+                result = self.attack.attack(example, ground_truth_output,options)
             except Exception as e:
                 raise e
             if (
@@ -264,10 +264,13 @@ class Attacker:
         for i in worklist:
             try:
                 example, ground_truth_output = self.dataset[i]
-                example = textattack.shared.AttackedText(example)
+                ismcq = len(example) > 2
+                if ismcq:
+                    options = example
+                example = textattack.shared.AttackedText(example["ctx"] if ismcq else example )
                 if self.dataset.label_names is not None:
                     example.attack_attrs["label_names"] = self.dataset.label_names
-                in_queue.put((i, example, ground_truth_output))
+                in_queue.put((i, example, ground_truth_output,options))
             except IndexError:
                 raise IndexError(
                     f"Tried to access element at {i} in dataset of size {len(self.dataset)}."
@@ -583,12 +586,15 @@ def attack_from_queue(
 
     while True:
         try:
-            i, example, ground_truth_output = in_queue.get(timeout=5)
+            try:
+                i, example, ground_truth_output = in_queue.get(timeout=5)
+            except:
+                i, example, ground_truth_output,options = in_queue.get(timeout=5)
             if i == "END" and example == "END" and ground_truth_output == "END":
                 # End process when sentinel value is received
                 break
             else:
-                result = attack.attack(example, ground_truth_output)
+                result = attack.attack(example, ground_truth_output,options=options)
                 out_queue.put((i, result))
         except Exception as e:
             if isinstance(e, queue.Empty):

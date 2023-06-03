@@ -13,13 +13,11 @@ https://github.com/jind11/TextFooler.
 
 import numpy as np
 import torch
-from torch.nn.functional import softmax
-
 from textattack.goal_function_results import GoalFunctionResultStatus
 from textattack.search_methods import SearchMethod
-from textattack.shared.validators import (
-    transformation_consists_of_word_swaps_and_deletions,
-)
+from textattack.shared.validators import \
+    transformation_consists_of_word_swaps_and_deletions
+from torch.nn.functional import softmax
 
 
 class GreedyWordSwapWIR(SearchMethod):
@@ -35,7 +33,7 @@ class GreedyWordSwapWIR(SearchMethod):
         self.wir_method = wir_method
         self.unk_token = unk_token
 
-    def _get_index_order(self, initial_text):
+    def _get_index_order(self, initial_text,options=None):
         """Returns word indices of ``initial_text`` in descending order of
         importance."""
 
@@ -46,7 +44,7 @@ class GreedyWordSwapWIR(SearchMethod):
                 initial_text.replace_word_at_index(i, self.unk_token)
                 for i in indices_to_order
             ]
-            leave_one_results, search_over = self.get_goal_results(leave_one_texts)
+            leave_one_results, search_over = self.get_goal_results(leave_one_texts,options=options)
             index_scores = np.array([result.score for result in leave_one_results])
 
         elif self.wir_method == "weighted-saliency":
@@ -130,11 +128,11 @@ class GreedyWordSwapWIR(SearchMethod):
 
         return index_order, search_over
 
-    def perform_search(self, initial_result):
+    def perform_search(self, initial_result,options=None):
         attacked_text = initial_result.attacked_text
 
         # Sort words by order of importance
-        index_order, search_over = self._get_index_order(attacked_text)
+        index_order, search_over = self._get_index_order(attacked_text,options)
         i = 0
         cur_result = initial_result
         results = None
@@ -147,7 +145,7 @@ class GreedyWordSwapWIR(SearchMethod):
             i += 1
             if len(transformed_text_candidates) == 0:
                 continue
-            results, search_over = self.get_goal_results(transformed_text_candidates)
+            results, search_over = self.get_goal_results(transformed_text_candidates,options=options)
             results = sorted(results, key=lambda x: -x.score)
             # Skip swaps which don't improve the score
             if results[0].score > cur_result.score:

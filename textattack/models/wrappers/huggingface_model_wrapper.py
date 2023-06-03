@@ -3,10 +3,9 @@ HuggingFace Model Wrapper
 --------------------------
 """
 
+import textattack
 import torch
 import transformers
-
-import textattack
 from textattack.models.helpers import T5ForTextToText
 from textattack.models.tokenizers import T5Tokenizer
 
@@ -18,10 +17,11 @@ torch.cuda.empty_cache()
 class HuggingFaceModelWrapper(PyTorchModelWrapper):
     """Loads a HuggingFace ``transformers`` model and tokenizer."""
 
-    def __init__(self, model, tokenizer):
+    def __init__(self, model, tokenizer, attack_args=None):
         assert isinstance(
             model, (transformers.PreTrainedModel, T5ForTextToText)
         ), f"`model` must be of type `transformers.PreTrainedModel`, but got type {type(model)}."
+        self.attack_args = attack_args
         assert isinstance(
             tokenizer,
             (
@@ -41,25 +41,60 @@ class HuggingFaceModelWrapper(PyTorchModelWrapper):
         positional arguments.)
         """
         # Default max length is set to be int(1e30), so we force 512 to enable batching.
-        max_length = (
-            512
-            if self.tokenizer.model_max_length == int(1e30)
-            else self.tokenizer.model_max_length
-        )
-        inputs_dict = self.tokenizer(
-            text_input_list,
-            add_special_tokens=True,
-            padding="max_length",
-            max_length=max_length,
-            truncation=True,
-            return_tensors="pt",
-        )
+        # max_length = (
+        #     512
+        #     if self.tokenizer.model_max_length == int(1e30)
+        #     else self.tokenizer.model_max_length
+        # )
+        max_length = 128
+        ismcq = isinstance(text_input_list[0],list) and len(text_input_list[0]) > 2
+        if ismcq:
+            text_input_list_temp = []
+            for input_list in text_input_list:
+                result = [input_list[i:i+2] for i in range(0, len(input_list), 2)]
+                for context, ending in result:
+                    text_a = context
+                    if ending.find("_") != -1:
+                        text_b = ending.replace("_", ending)
+                    else:
+                        text_b = f"{ending}"
+                    text_input_list_temp.append((text_a,text_b))
+            inputs_dict = self.tokenizer(
+                text_input_list_temp,
+                max_length=max_length,
+                padding="max_length",
+                truncation=True,
+                
+                add_special_tokens=True,
+                return_tensors="pt",
+            )
+            inputs_dict["input_ids"] = inputs_dict["input_ids"].reshape(len(text_input_list),-1,max_length)
+            inputs_dict["attention_mask"] = inputs_dict["attention_mask"].reshape(len(text_input_list),-1,max_length)
+            inputs_dict["token_type_ids"] = inputs_dict["token_type_ids"].reshape(len(text_input_list),-1,max_length)
+            
+        else:
+            inputs_dict = self.tokenizer(
+                text_input_list,
+                add_special_tokens=True,
+                padding="max_length",
+                max_length=max_length,
+                truncation=True,
+                return_tensors="pt",
+            )
         model_device = next(self.model.parameters()).device
         inputs_dict.to(model_device)
-
+        # print(text_input_list)
         with torch.no_grad():
-            outputs = self.model(**inputs_dict)
-
+            outputs = self.model(
+                **inputs_dict,
+                args=self.attack_args,
+                output_hidden_states=False,
+                output_attentions=True,
+                # head_mask=head_mask,
+                return_dict=False,
+            )
+        # print(outputs)
+        del inputs_dict
         if isinstance(outputs[0], str):
             # HuggingFace sequence-to-sequence models return a list of
             # string predictions as output. In this case, return the full
@@ -69,7 +104,9 @@ class HuggingFaceModelWrapper(PyTorchModelWrapper):
             # HuggingFace classification models return a tuple as output
             # where the first item in the tuple corresponds to the list of
             # scores for each input.
-            return outputs.logits
+            # print(outputs[1])
+            # input()
+            return outputs[1].detach().cpu() if outputs[0] is None else outputs[0].detach().cpu()
 
     def get_grad(self, text_input):
         """Get gradient of loss with respect to input tokens.

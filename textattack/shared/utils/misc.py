@@ -8,7 +8,7 @@ import torch
 import textattack
 
 device = os.environ.get(
-    "TA_DEVICE", torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    "TA_DEVICE", torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 )
 
 

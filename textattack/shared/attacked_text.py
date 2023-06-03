@@ -8,16 +8,15 @@ A helper class that represents a string that can be attacked.
 
 from __future__ import annotations
 
-from collections import OrderedDict
 import math
+from collections import OrderedDict
 from typing import Dict, Iterable, List, Optional, Set, Tuple
 
 import flair
-from flair.data import Sentence
 import numpy as np
-import torch
-
 import textattack
+import torch
+from flair.data import Sentence
 
 from .utils import device, words_from_text
 
@@ -51,6 +50,8 @@ class AttackedText:
             self._text_input = OrderedDict([("text", text_input)])
         elif isinstance(text_input, OrderedDict):
             self._text_input = text_input
+        # elif isinstance(text_input, list):
+        #     self._text_input = "".join(text_input)
         else:
             raise TypeError(
                 f"Invalid text_input type {type(text_input)} (required str or OrderedDict)"
@@ -562,6 +563,10 @@ class AttackedText:
 
         Multiply inputs are joined with a line break.
         """
+        if "dialogue" in self._text_input.keys():
+            # for cho in self._text_input["choice"]:
+            return "\n".join([self._text_input["dialogue"]])
+
         return "\n".join(self._text_input.values())
 
     @property

@@ -3,12 +3,11 @@ Sentence Encoder Class
 ------------------------
 """
 
-from abc import ABC
 import math
+from abc import ABC
 
 import numpy as np
 import torch
-
 from textattack.constraints import Constraint
 
 
@@ -169,7 +168,7 @@ class SentenceEncoder(Constraint, ABC):
             starting_embeddings = starting_embedding.unsqueeze(dim=0).repeat(
                 len(transformed_embeddings), 1
             )
-
+        embeddings = None
         return self.sim_metric(starting_embeddings, transformed_embeddings)
 
     def _check_constraint_many(self, transformed_texts, reference_text):

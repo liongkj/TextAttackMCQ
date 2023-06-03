@@ -12,11 +12,10 @@ BERT-Attack:
 """
 from textattack import Attack
 from textattack.constraints.overlap import MaxWordsPerturbed
-from textattack.constraints.pre_transformation import (
-    RepeatModification,
-    StopwordModification,
-)
-from textattack.constraints.semantics.sentence_encoders import UniversalSentenceEncoder
+from textattack.constraints.pre_transformation import (RepeatModification,
+                                                       StopwordModification)
+from textattack.constraints.semantics.sentence_encoders import \
+    UniversalSentenceEncoder
 from textattack.goal_functions import UntargetedClassification
 from textattack.search_methods import GreedyWordSwapWIR
 from textattack.transformations import WordSwapMaskedLM
@@ -38,7 +37,7 @@ class BERTAttackLi2020(AttackRecipe):
     def build(model_wrapper):
         # [from correspondence with the author]
         # Candidate size K is set to 48 for all data-sets.
-        transformation = WordSwapMaskedLM(method="bert-attack", max_candidates=48)
+        transformation = WordSwapMaskedLM(method="bert-attack", max_candidates=10)
         #
         # Don't modify the same word twice or stopwords.
         #

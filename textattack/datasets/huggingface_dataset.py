@@ -11,7 +11,6 @@ TextAttack allows users to provide their own dataset or load from HuggingFace.
 import collections
 
 import datasets
-
 import textattack
 
 from .dataset import Dataset
@@ -59,6 +58,9 @@ def get_datasets_dataset_columns(dataset):
     elif {"label", "review"} <= schema:
         input_columns = ("review",)
         output_column = "label"
+    elif {"dialogue", "question", "choice", "answer"} <= schema:
+        input_columns = ("dialogue","question", "choice")
+        output_column = "answer"
     else:
         raise ValueError(
             f"Unsupported dataset schema {schema}. Try passing your own `dataset_columns` argument."
@@ -114,11 +116,19 @@ class HuggingFaceDataset(Dataset):
         else:
             self._name = name_or_dataset
             self._subset = subset
-            self._dataset = datasets.load_dataset(self._name, subset)[split]
-            subset_print_str = f", subset {_cb(subset)}" if subset else ""
-            textattack.shared.logger.info(
-                f"Loading {_cb('datasets')} dataset {_cb(self._name)}{subset_print_str}, split {_cb(split)}."
-            )
+
+            try:
+                self._dataset = datasets.load_from_disk(f"data_{self._name}")
+                subset_print_str = f", subset {_cb(subset)}" if subset else ""
+                textattack.shared.logger.info(
+                    f"Loading {_cb('datasets')} dataset {_cb(self._name)}{subset_print_str}, split {_cb(split)}."
+                )
+            except:
+                self._dataset = datasets.load_dataset(
+                    self._name, subset, cache_dir="data", ignore_verifications=True
+                )[split]
+                self._dataset.save_to_disk(f"data_{self._name}")
+
         # Input/output column order, like (('premise', 'hypothesis'), 'label')
         (
             self.input_columns,

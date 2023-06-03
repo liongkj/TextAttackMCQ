@@ -7,15 +7,12 @@ from collections import OrderedDict
 from typing import List, Union
 
 import lru
-import torch
-
 import textattack
-from textattack.attack_results import (
-    FailedAttackResult,
-    MaximizedAttackResult,
-    SkippedAttackResult,
-    SuccessfulAttackResult,
-)
+import torch
+from textattack.attack_results import (FailedAttackResult,
+                                       MaximizedAttackResult,
+                                       SkippedAttackResult,
+                                       SuccessfulAttackResult)
 from textattack.constraints import Constraint, PreTransformationConstraint
 from textattack.goal_function_results import GoalFunctionResultStatus
 from textattack.goal_functions import GoalFunction
@@ -382,7 +379,7 @@ class Attack:
         filtered_texts.sort(key=lambda t: t.text)
         return filtered_texts
 
-    def _attack(self, initial_result):
+    def _attack(self, initial_result,options=None):
         """Calls the ``SearchMethod`` to perturb the ``AttackedText`` stored in
         ``initial_result``.
 
@@ -393,7 +390,7 @@ class Attack:
             A ``SuccessfulAttackResult``, ``FailedAttackResult``,
                 or ``MaximizedAttackResult``.
         """
-        final_result = self.search_method(initial_result)
+        final_result = self.search_method(initial_result,options=options)
         self.clear_cache()
         if final_result.goal_status == GoalFunctionResultStatus.SUCCEEDED:
             result = SuccessfulAttackResult(
@@ -414,7 +411,7 @@ class Attack:
             raise ValueError(f"Unrecognized goal status {final_result.goal_status}")
         return result
 
-    def attack(self, example, ground_truth_output):
+    def attack(self, example, ground_truth_output,options=None):
         """Attack a single example.
 
         Args:
@@ -440,12 +437,12 @@ class Attack:
             ground_truth_output, (int, str)
         ), "`ground_truth_output` must either be `str` or `int`."
         goal_function_result, _ = self.goal_function.init_attack_example(
-            example, ground_truth_output
+            example, ground_truth_output,options
         )
         if goal_function_result.goal_status == GoalFunctionResultStatus.SKIPPED:
             return SkippedAttackResult(goal_function_result)
         else:
-            result = self._attack(goal_function_result)
+            result = self._attack(goal_function_result,options)
             return result
 
     def __repr__(self):

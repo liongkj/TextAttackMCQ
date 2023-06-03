@@ -3,10 +3,14 @@ universal sentence encoder class
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 """
 
+import random
+from multiprocessing import Process, Queue
+
 from textattack.constraints.semantics.sentence_encoders import SentenceEncoder
 from textattack.shared.utils import LazyLoader
 
 hub = LazyLoader("tensorflow_hub", globals(), "tensorflow_hub")
+import tensorflow as tf
 
 
 class UniversalSentenceEncoder(SentenceEncoder):
@@ -24,12 +28,25 @@ class UniversalSentenceEncoder(SentenceEncoder):
         self._tfhub_url = tfhub_url
         # Lazily load the model
         self.model = None
+        gpus = tf.config.experimental.list_physical_devices('GPU')
+        if gpus:
+        # Restrict TensorFlow to only use the first GPU
+            try:
+                tf.config.experimental.set_visible_devices(gpus[1], 'GPU')
+            except RuntimeError as e:
+                # Visible devices must be set at program startup
+                print(e)
 
     def encode(self, sentences):
         if not self.model:
             self.model = hub.load(self._tfhub_url)
         encoding = self.model(sentences)
+        # queue = Queue()  # Here
+        # p1 = Process(target=self.model, args=(sentences))
+        # p1.start()
+        # p1.join()
 
+        # res = queue.get()
         if isinstance(encoding, dict):
             encoding = encoding["outputs"]
 

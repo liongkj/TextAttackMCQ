@@ -578,6 +578,7 @@ class _CommandLineAttackArgs:
         parser.add_argument(
             "--model-batch-size",
             type=int,
+            # default=default_obj.model_batch_size,
             default=default_obj.model_batch_size,
             help="The batch size for making calls to the model.",
         )
