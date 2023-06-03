@@ -19,17 +19,15 @@ def test_embedding_gensim():
     from textattack.shared.utils.install import TEXTATTACK_CACHE_DIR
 
     path = os.path.join(TEXTATTACK_CACHE_DIR, "test_gensim_embedding.txt")
-    f = open(path, "w")
-    f.write(
-        """4 2
+    with open(path, "w") as f:
+        f.write(
+            """4 2
 hi 1 0
 hello 1 1
 bye -1 0
 bye-bye -1 1
     """
-    )
-    f.close()
-
+        )
     gensim = LazyLoader("gensim", globals(), "gensim")
     keyed_vectors = (
         gensim.models.keyedvectors.Word2VecKeyedVectors.load_word2vec_format(path)

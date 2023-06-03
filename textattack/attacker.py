@@ -117,27 +117,26 @@ class Attacker:
             logger.info(
                 f"Recovered from checkpoint previously saved at {self._checkpoint.datetime}."
             )
+        elif self.attack_args.num_successful_examples:
+            num_remaining_attacks = self.attack_args.num_successful_examples
+            # We make `worklist` deque (linked-list) for easy pop and append.
+            # Candidates are other samples we can attack if we need more samples.
+            worklist, worklist_candidates = self._get_worklist(
+                self.attack_args.num_examples_offset,
+                len(self.dataset),
+                self.attack_args.num_successful_examples,
+                self.attack_args.shuffle,
+            )
         else:
-            if self.attack_args.num_successful_examples:
-                num_remaining_attacks = self.attack_args.num_successful_examples
-                # We make `worklist` deque (linked-list) for easy pop and append.
-                # Candidates are other samples we can attack if we need more samples.
-                worklist, worklist_candidates = self._get_worklist(
-                    self.attack_args.num_examples_offset,
-                    len(self.dataset),
-                    self.attack_args.num_successful_examples,
-                    self.attack_args.shuffle,
-                )
-            else:
-                num_remaining_attacks = self.attack_args.num_examples
-                # We make `worklist` deque (linked-list) for easy pop and append.
-                # Candidates are other samples we can attack if we need more samples.
-                worklist, worklist_candidates = self._get_worklist(
-                    self.attack_args.num_examples_offset,
-                    len(self.dataset),
-                    self.attack_args.num_examples,
-                    self.attack_args.shuffle,
-                )
+            num_remaining_attacks = self.attack_args.num_examples
+            # We make `worklist` deque (linked-list) for easy pop and append.
+            # Candidates are other samples we can attack if we need more samples.
+            worklist, worklist_candidates = self._get_worklist(
+                self.attack_args.num_examples_offset,
+                len(self.dataset),
+                self.attack_args.num_examples,
+                self.attack_args.shuffle,
+            )
 
         if not self.attack_args.silent:
             print(self.attack, "\n")
@@ -177,10 +176,9 @@ class Attacker:
                 if worklist_candidates:
                     next_sample = worklist_candidates.popleft()
                     worklist.append(next_sample)
-                else:
-                    if not sample_exhaustion_warned:
-                        logger.warn("Ran out of samples to attack!")
-                        sample_exhaustion_warned = True
+                elif not sample_exhaustion_warned:
+                    logger.warn("Ran out of samples to attack!")
+                    sample_exhaustion_warned = True
             else:
                 pbar.update(1)
 
@@ -237,27 +235,26 @@ class Attacker:
             logger.info(
                 f"Recovered from checkpoint previously saved at {self._checkpoint.datetime}."
             )
+        elif self.attack_args.num_successful_examples:
+            num_remaining_attacks = self.attack_args.num_successful_examples
+            # We make `worklist` deque (linked-list) for easy pop and append.
+            # Candidates are other samples we can attack if we need more samples.
+            worklist, worklist_candidates = self._get_worklist(
+                self.attack_args.num_examples_offset,
+                len(self.dataset),
+                self.attack_args.num_successful_examples,
+                self.attack_args.shuffle,
+            )
         else:
-            if self.attack_args.num_successful_examples:
-                num_remaining_attacks = self.attack_args.num_successful_examples
-                # We make `worklist` deque (linked-list) for easy pop and append.
-                # Candidates are other samples we can attack if we need more samples.
-                worklist, worklist_candidates = self._get_worklist(
-                    self.attack_args.num_examples_offset,
-                    len(self.dataset),
-                    self.attack_args.num_successful_examples,
-                    self.attack_args.shuffle,
-                )
-            else:
-                num_remaining_attacks = self.attack_args.num_examples
-                # We make `worklist` deque (linked-list) for easy pop and append.
-                # Candidates are other samples we can attack if we need more samples.
-                worklist, worklist_candidates = self._get_worklist(
-                    self.attack_args.num_examples_offset,
-                    len(self.dataset),
-                    self.attack_args.num_examples,
-                    self.attack_args.shuffle,
-                )
+            num_remaining_attacks = self.attack_args.num_examples
+            # We make `worklist` deque (linked-list) for easy pop and append.
+            # Candidates are other samples we can attack if we need more samples.
+            worklist, worklist_candidates = self._get_worklist(
+                self.attack_args.num_examples_offset,
+                len(self.dataset),
+                self.attack_args.num_examples,
+                self.attack_args.shuffle,
+            )
 
         in_queue = torch.multiprocessing.Queue()
         out_queue = torch.multiprocessing.Queue()
@@ -348,10 +345,9 @@ class Attacker:
                         example.attack_attrs["label_names"] = self.dataset.label_names
                     worklist.append(next_sample)
                     in_queue.put((next_sample, example, ground_truth_output))
-                else:
-                    if not sample_exhaustion_warned:
-                        logger.warn("Ran out of samples to attack!")
-                        sample_exhaustion_warned = True
+                elif not sample_exhaustion_warned:
+                    logger.warn("Ran out of samples to attack!")
+                    sample_exhaustion_warned = True
             else:
                 pbar.update()
 
@@ -542,8 +538,7 @@ def set_env_variables(gpu_id):
     try:
         import tensorflow as tf
 
-        gpus = tf.config.experimental.list_physical_devices("GPU")
-        if gpus:
+        if gpus := tf.config.experimental.list_physical_devices("GPU"):
             try:
                 # Currently, memory growth needs to be the same across GPUs
                 gpu = gpus[gpu_id]
@@ -587,9 +582,8 @@ def attack_from_queue(
             if i == "END" and example == "END" and ground_truth_output == "END":
                 # End process when sentinel value is received
                 break
-            else:
-                result = attack.attack(example, ground_truth_output)
-                out_queue.put((i, result))
+            result = attack.attack(example, ground_truth_output)
+            out_queue.put((i, result))
         except Exception as e:
             if isinstance(e, queue.Empty):
                 continue

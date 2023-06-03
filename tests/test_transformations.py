@@ -23,13 +23,8 @@ def test_word_swap_change_location():
     tagger.predict(original_text)
     tagger.predict(augmented_text)
 
-    entity_original = []
-    entity_augmented = []
-
-    for entity in original_text.get_spans("ner"):
-        entity_original.append(entity.tag)
-    for entity in augmented_text.get_spans("ner"):
-        entity_augmented.append(entity.tag)
+    entity_original = [entity.tag for entity in original_text.get_spans("ner")]
+    entity_augmented = [entity.tag for entity in augmented_text.get_spans("ner")]
     assert entity_original == entity_augmented
 
 
@@ -49,11 +44,6 @@ def test_word_swap_change_name():
     tagger.predict(original_text)
     tagger.predict(augmented_text)
 
-    entity_original = []
-    entity_augmented = []
-
-    for entity in original_text.get_spans("ner"):
-        entity_original.append(entity.tag)
-    for entity in augmented_text.get_spans("ner"):
-        entity_augmented.append(entity.tag)
+    entity_original = [entity.tag for entity in original_text.get_spans("ner")]
+    entity_augmented = [entity.tag for entity in augmented_text.get_spans("ner")]
     assert entity_original == entity_augmented

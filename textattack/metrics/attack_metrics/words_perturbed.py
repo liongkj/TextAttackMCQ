@@ -37,9 +37,7 @@ class WordsPerturbed(Metric):
         for i, result in enumerate(self.results):
             self.all_num_words[i] = len(result.original_result.attacked_text.words)
 
-            if isinstance(result, FailedAttackResult) or isinstance(
-                result, SkippedAttackResult
-            ):
+            if isinstance(result, (FailedAttackResult, SkippedAttackResult)):
                 continue
 
             num_words_changed = len(

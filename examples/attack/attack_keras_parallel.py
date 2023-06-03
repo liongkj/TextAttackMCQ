@@ -81,8 +81,7 @@ class CustomKerasModelWrapper(ModelWrapper):
                         BoW_array[vocabulary[word]] += 1
             x_transform.append(BoW_array)
         x_transform = np.array(x_transform)
-        prediction = self.model.predict(x_transform)
-        return prediction
+        return self.model.predict(x_transform)
 
 
 model = Sequential()

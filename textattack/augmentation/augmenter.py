@@ -184,10 +184,10 @@ class Augmenter:
         perturbed_texts = sorted([at.printable_text() for at in all_transformed_texts])
 
         if self.advanced_metrics:
-            for transformed_texts in all_transformed_texts:
-                augmentation_results.append(
-                    AugmentationResult(original_text, transformed_texts)
-                )
+            augmentation_results.extend(
+                AugmentationResult(original_text, transformed_texts)
+                for transformed_texts in all_transformed_texts
+            )
             perplexity_stats = Perplexity().calculate(augmentation_results)
             use_stats = USEMetric().calculate(augmentation_results)
             return perturbed_texts, perplexity_stats, use_stats
@@ -232,15 +232,15 @@ class Augmenter:
 
     def __repr__(self):
         main_str = "Augmenter" + "("
-        lines = []
-        # self.transformation
-        lines.append(utils.add_indent(f"(transformation):  {self.transformation}", 2))
+        lines = [utils.add_indent(f"(transformation):  {self.transformation}", 2)]
         # self.constraints
         constraints_lines = []
         constraints = self.constraints + self.pre_transformation_constraints
         if len(constraints):
-            for i, constraint in enumerate(constraints):
-                constraints_lines.append(utils.add_indent(f"({i}): {constraint}", 2))
+            constraints_lines.extend(
+                utils.add_indent(f"({i}): {constraint}", 2)
+                for i, constraint in enumerate(constraints)
+            )
             constraints_str = utils.add_indent("\n" + "\n".join(constraints_lines), 2)
         else:
             constraints_str = "None"

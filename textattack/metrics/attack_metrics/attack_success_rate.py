@@ -28,10 +28,9 @@ class AttackSuccessRate(Metric):
         self.results = results
         self.total_attacks = len(self.results)
 
-        for i, result in enumerate(self.results):
+        for result in self.results:
             if isinstance(result, FailedAttackResult):
                 self.failed_attacks += 1
-                continue
             elif isinstance(result, SkippedAttackResult):
                 self.skipped_attacks += 1
                 continue
@@ -54,13 +53,11 @@ class AttackSuccessRate(Metric):
         original_accuracy = (
             (self.total_attacks - self.skipped_attacks) * 100.0 / (self.total_attacks)
         )
-        original_accuracy = round(original_accuracy, 2)
-        return original_accuracy
+        return round(original_accuracy, 2)
 
     def attack_accuracy_perc(self):
         accuracy_under_attack = (self.failed_attacks) * 100.0 / (self.total_attacks)
-        accuracy_under_attack = round(accuracy_under_attack, 2)
-        return accuracy_under_attack
+        return round(accuracy_under_attack, 2)
 
     def attack_success_rate_perc(self):
         if self.successful_attacks + self.failed_attacks == 0:
@@ -71,5 +68,4 @@ class AttackSuccessRate(Metric):
                 * 100.0
                 / (self.successful_attacks + self.failed_attacks)
             )
-        attack_success_rate = round(attack_success_rate, 2)
-        return attack_success_rate
+        return round(attack_success_rate, 2)

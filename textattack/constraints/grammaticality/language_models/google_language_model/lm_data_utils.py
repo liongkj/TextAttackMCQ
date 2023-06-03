@@ -80,9 +80,7 @@ class Vocabulary(object):
         return len(self._id_to_word)
 
     def word_to_id(self, word):
-        if word in self._word_to_id:
-            return self._word_to_id[word]
-        return self.unk
+        return self._word_to_id[word] if word in self._word_to_id else self.unk
 
     def id_to_word(self, cur_id):
         """Converts an ID to the word it represents.
@@ -93,9 +91,7 @@ class Vocabulary(object):
         Returns:
           The word that :obj:`cur_id` represents.
         """
-        if cur_id < self.size:
-            return self._id_to_word[cur_id]
-        return "ERROR"
+        return self._id_to_word[cur_id] if cur_id < self.size else "ERROR"
 
     def decode(self, cur_ids):
         """Convert a list of ids to a sentence, with space inserted."""
@@ -118,12 +114,7 @@ class CharsVocabulary(Vocabulary):
         for word in self._id_to_word:
             chars_set |= set(word)
 
-        free_ids = []
-        for i in range(256):
-            if chr(i) in chars_set:
-                continue
-            free_ids.append(chr(i))
-
+        free_ids = [chr(i) for i in range(256) if chr(i) not in chars_set]
         if len(free_ids) < 5:
             raise ValueError("Not enough free char ids: %d" % len(free_ids))
 
@@ -288,9 +279,7 @@ class LM1BDataset(object):
 
     def _get_sentence(self, forever=True):
         while True:
-            ids = self._load_random_shard()
-            for current_ids in ids:
-                yield current_ids
+            yield from self._load_random_shard()
             if not forever:
                 break
 

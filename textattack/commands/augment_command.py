@@ -144,19 +144,17 @@ class AugmentCommand(TextAttackCommand):
             # mark where commas and quotes occur within the text value
             def markQuotes(lines):
                 for row in lines:
-                    row = row.replace('"', '"/')
-                    yield row
+                    yield row.replace('"', '"/')
 
             dialect = csv.Sniffer().sniff(csv_file.readline(), delimiters=";,")
             csv_file.seek(0)
-            rows = [
-                row
-                for row in csv.DictReader(
+            rows = list(
+                csv.DictReader(
                     markQuotes(csv_file),
                     dialect=dialect,
                     skipinitialspace=True,
                 )
-            ]
+            )
 
             # replace markings with quotations and commas
             for row in rows:
@@ -167,7 +165,7 @@ class AugmentCommand(TextAttackCommand):
                             if row[item][i - 1] == '"':
                                 row[item] = row[item][:i] + row[item][i + 1 :]
                             else:
-                                row[item] = row[item][:i] + '"' + row[item][i + 1 :]
+                                row[item] = f'{row[item][:i]}"{row[item][i + 1:]}'
                         i += 1
 
             # Validate input column.

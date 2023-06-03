@@ -69,9 +69,7 @@ class COLA(Constraint):
         else:
             threshold = reference_score - (reference_score * self.max_diff)
 
-        if num_valid < threshold:
-            return False
-        return True
+        return num_valid >= threshold
 
     def extra_repr_keys(self):
         return [

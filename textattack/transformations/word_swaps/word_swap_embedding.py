@@ -49,7 +49,7 @@ class WordSwapEmbedding(WordSwap):
             word_id = self.embedding.word2index(word.lower())
             nnids = self.embedding.nearest_neighbours(word_id, self.max_candidates)
             candidate_words = []
-            for i, nbr_id in enumerate(nnids):
+            for nbr_id in nnids:
                 nbr_word = self.embedding.index2word(nbr_id)
                 candidate_words.append(recover_word_case(nbr_word, word))
             return candidate_words

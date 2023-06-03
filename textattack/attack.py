@@ -134,11 +134,9 @@ class Attack:
         if not self.transformation.deterministic:
             self.use_transformation_cache = False
         elif isinstance(self.transformation, CompositeTransformation):
-            self.use_transformation_cache = True
-            for t in self.transformation.transformations:
-                if not t.deterministic:
-                    self.use_transformation_cache = False
-                    break
+            self.use_transformation_cache = all(
+                t.deterministic for t in self.transformation.transformations
+            )
         else:
             self.use_transformation_cache = True
         self.transformation_cache_size = transformation_cache_size
@@ -268,13 +266,11 @@ class Attack:
         Returns:
             A filtered list of transformations where each transformation matches the constraints
         """
-        transformed_texts = self.transformation(
+        return self.transformation(
             current_text,
             pre_transformation_constraints=self.pre_transformation_constraints,
             **kwargs,
         )
-
-        return transformed_texts
 
     def get_transformations(self, current_text, original_text=None, **kwargs):
         """Applies ``self.transformation`` to ``text``, then filters the list
@@ -445,8 +441,7 @@ class Attack:
         if goal_function_result.goal_status == GoalFunctionResultStatus.SKIPPED:
             return SkippedAttackResult(goal_function_result)
         else:
-            result = self._attack(goal_function_result)
-            return result
+            return self._attack(goal_function_result)
 
     def __repr__(self):
         """Prints attack parameters in a human-readable string.
@@ -455,9 +450,8 @@ class Attack:
         https://github.com/pytorch/pytorch/blob/master/torch/nn/modules/module.py
         """
         main_str = "Attack" + "("
-        lines = []
+        lines = [utils.add_indent(f"(search_method): {self.search_method}", 2)]
 
-        lines.append(utils.add_indent(f"(search_method): {self.search_method}", 2))
         # self.goal_function
         lines.append(utils.add_indent(f"(goal_function):  {self.goal_function}", 2))
         # self.transformation
@@ -466,8 +460,10 @@ class Attack:
         constraints_lines = []
         constraints = self.constraints + self.pre_transformation_constraints
         if len(constraints):
-            for i, constraint in enumerate(constraints):
-                constraints_lines.append(utils.add_indent(f"({i}): {constraint}", 2))
+            constraints_lines.extend(
+                utils.add_indent(f"({i}): {constraint}", 2)
+                for i, constraint in enumerate(constraints)
+            )
             constraints_str = utils.add_indent("\n" + "\n".join(constraints_lines), 2)
         else:
             constraints_str = "None"

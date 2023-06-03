@@ -244,10 +244,7 @@ class WordSwapMaskedLM(WordSwap):
                     combination_results.append((word, perplexity))
             # Sort to get top-K results
             sorted(combination_results, key=lambda x: x[1])
-            top_replacements = [
-                x[0] for x in combination_results[: self.max_candidates]
-            ]
-            return top_replacements
+            return [x[0] for x in combination_results[: self.max_candidates]]
 
     def _get_transformations(self, current_text, indices_to_modify):
         indices_to_modify = list(indices_to_modify)

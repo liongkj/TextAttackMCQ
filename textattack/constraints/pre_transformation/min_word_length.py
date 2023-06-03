@@ -19,8 +19,9 @@ class MinWordLength(PreTransformationConstraint):
         self.min_length = min_length
 
     def _get_modifiable_indices(self, current_text):
-        idxs = []
-        for i, word in enumerate(current_text.words):
-            if len(word) >= self.min_length:
-                idxs.append(i)
+        idxs = [
+            i
+            for i, word in enumerate(current_text.words)
+            if len(word) >= self.min_length
+        ]
         return set(idxs)

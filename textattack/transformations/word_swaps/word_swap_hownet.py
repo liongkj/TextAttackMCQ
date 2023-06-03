@@ -23,7 +23,7 @@ class WordSwapHowNet(WordSwap):
 
         # Download synonym candidates bank if they're not cached.
         cache_path = utils.download_from_s3(
-            "{}/{}".format(WordSwapHowNet.PATH, "word_candidates_sense.pkl")
+            f"{WordSwapHowNet.PATH}/word_candidates_sense.pkl"
         )
 
         # Actually load the files from disk.
@@ -69,12 +69,11 @@ class WordSwapHowNet(WordSwap):
             replacement_words = self._get_replacement_words(
                 word_to_replace, word_to_replace_pos
             )
-            transformed_texts_idx = []
-            for r in replacement_words:
-                if r != word_to_replace and utils.is_one_word(r):
-                    transformed_texts_idx.append(
-                        current_text.replace_word_at_index(i, r)
-                    )
+            transformed_texts_idx = [
+                current_text.replace_word_at_index(i, r)
+                for r in replacement_words
+                if r != word_to_replace and utils.is_one_word(r)
+            ]
             transformed_texts.extend(transformed_texts_idx)
 
         return transformed_texts

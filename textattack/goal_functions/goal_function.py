@@ -50,10 +50,7 @@ class GoalFunction(ReprMixin, ABC):
         self.use_cache = use_cache
         self.query_budget = query_budget
         self.batch_size = model_batch_size
-        if self.use_cache:
-            self._call_model_cache = lru.LRU(model_cache_size)
-        else:
-            self._call_model_cache = None
+        self._call_model_cache = lru.LRU(model_cache_size) if self.use_cache else None
 
     def clear_cache(self):
         if self.use_cache:
@@ -114,8 +111,9 @@ class GoalFunction(ReprMixin, ABC):
         return results, self.num_queries == self.query_budget
 
     def _get_goal_status(self, model_output, attacked_text, check_skip=False):
-        should_skip = check_skip and self._should_skip(model_output, attacked_text)
-        if should_skip:
+        if should_skip := check_skip and self._should_skip(
+            model_output, attacked_text
+        ):
             return GoalFunctionResultStatus.SKIPPED
         if self.maximizable:
             return GoalFunctionResultStatus.MAXIMIZING
@@ -198,26 +196,24 @@ class GoalFunction(ReprMixin, ABC):
         """
         if not self.use_cache:
             return self._call_model_uncached(attacked_text_list)
-        else:
-            uncached_list = []
-            for text in attacked_text_list:
-                if text in self._call_model_cache:
-                    # Re-write value in cache. This moves the key to the top of the
-                    # LRU cache and prevents the unlikely event that the text
-                    # is overwritten when we store the inputs from `uncached_list`.
-                    self._call_model_cache[text] = self._call_model_cache[text]
-                else:
-                    uncached_list.append(text)
-            uncached_list = [
-                text
-                for text in attacked_text_list
-                if text not in self._call_model_cache
-            ]
-            outputs = self._call_model_uncached(uncached_list)
-            for text, output in zip(uncached_list, outputs):
-                self._call_model_cache[text] = output
-            all_outputs = [self._call_model_cache[text] for text in attacked_text_list]
-            return all_outputs
+        uncached_list = []
+        for text in attacked_text_list:
+            if text in self._call_model_cache:
+                # Re-write value in cache. This moves the key to the top of the
+                # LRU cache and prevents the unlikely event that the text
+                # is overwritten when we store the inputs from `uncached_list`.
+                self._call_model_cache[text] = self._call_model_cache[text]
+            else:
+                uncached_list.append(text)
+        uncached_list = [
+            text
+            for text in attacked_text_list
+            if text not in self._call_model_cache
+        ]
+        outputs = self._call_model_uncached(uncached_list)
+        for text, output in zip(uncached_list, outputs):
+            self._call_model_cache[text] = output
+        return [self._call_model_cache[text] for text in attacked_text_list]
 
     def extra_repr_keys(self):
         attrs = []

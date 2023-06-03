@@ -22,7 +22,7 @@ class ClassificationGoalFunction(GoalFunction):
         outputs need to have a softmax applied.
         """
         # Automatically cast a list or ndarray of predictions to a tensor.
-        if isinstance(scores, list) or isinstance(scores, np.ndarray):
+        if isinstance(scores, (list, np.ndarray)):
             scores = torch.tensor(scores)
 
         # Ensure the returned value is now a tensor.

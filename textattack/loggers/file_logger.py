@@ -34,16 +34,11 @@ class FileLogger(Logger):
         self.num_results = 0
 
     def __getstate__(self):
-        # Temporarily save file handle b/c we can't copy it
-        state = {i: self.__dict__[i] for i in self.__dict__ if i != "fout"}
-        return state
+        return {i: self.__dict__[i] for i in self.__dict__ if i != "fout"}
 
     def __setstate__(self, state):
         self.__dict__ = state
-        if self.stdout:
-            self.fout = sys.stdout
-        else:
-            self.fout = open(self.filename, "a")
+        self.fout = sys.stdout if self.stdout else open(self.filename, "a")
 
     def log_attack_result(self, result):
         self.num_results += 1

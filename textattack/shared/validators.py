@@ -100,15 +100,15 @@ def transformation_consists_of(transformation, transformation_classes):
     from textattack.transformations import CompositeTransformation
 
     if isinstance(transformation, CompositeTransformation):
-        for t in transformation.transformations:
-            if not transformation_consists_of(t, transformation_classes):
-                return False
-        return True
+        return all(
+            transformation_consists_of(t, transformation_classes)
+            for t in transformation.transformations
+        )
     else:
-        for transformation_class in transformation_classes:
-            if isinstance(transformation, transformation_class):
-                return True
-        return False
+        return any(
+            isinstance(transformation, transformation_class)
+            for transformation_class in transformation_classes
+        )
 
 
 def transformation_consists_of_word_swaps(transformation):

@@ -59,8 +59,8 @@ class QueryHandler:
                 start : min(len(sentences), start + batch_size)
             ]
             batch = sentences[start : min(len(sentences), start + batch_size)]
-            raw_idx_list = [[] for i in range(sentence_length + 1)]
-            for i, s in enumerate(batch):
+            raw_idx_list = [[] for _ in range(sentence_length + 1)]
+            for s in batch:
                 s = [word for word in s if word in self.word_to_idx]
                 words = ["<S>"] + s
                 word_idxs = [self.word_to_idx[w] for w in words]
@@ -87,10 +87,8 @@ class QueryHandler:
                 else:
                     log_probs.append(
                         sum(
-                            [
-                                decode[t, i, target[t, i]].item()
-                                for t in range(sentence_length - num_idxs_dropped)
-                            ]
+                            decode[t, i, target[t, i]].item()
+                            for t in range(sentence_length - num_idxs_dropped)
                         )
                     )
         return log_probs
@@ -105,25 +103,23 @@ class QueryHandler:
         )
         mapto = torch.from_numpy(util_reverse(np.argsort(-word_freq))).long().to(device)
 
-        model_file = open(os.path.join(lm_folder_path, "lm-state-dict.pt"), "rb")
+        with open(os.path.join(lm_folder_path, "lm-state-dict.pt"), "rb") as model_file:
+            model = RNNModel(
+                "GRU",
+                793471,
+                256,
+                2048,
+                1,
+                [4200, 35000, 180000, 793471],
+                dropout=0.01,
+                proj=True,
+                lm1b=True,
+            )
 
-        model = RNNModel(
-            "GRU",
-            793471,
-            256,
-            2048,
-            1,
-            [4200, 35000, 180000, 793471],
-            dropout=0.01,
-            proj=True,
-            lm1b=True,
-        )
-
-        model.load_state_dict(torch.load(model_file, map_location=device))
-        model.full = True  # Use real softmax--important!
-        model.to(device)
-        model.eval()
-        model_file.close()
+            model.load_state_dict(torch.load(model_file, map_location=device))
+            model.full = True  # Use real softmax--important!
+            model.to(device)
+            model.eval()
         return QueryHandler(model, word_to_idx, mapto, device)
 
 

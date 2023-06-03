@@ -238,10 +238,7 @@ class DatasetArgs:
         elif args.dataset_by_model in TEXTATTACK_DATASET_BY_MODEL:
             dataset = TEXTATTACK_DATASET_BY_MODEL[args.dataset_by_model]
             if dataset[0].startswith("textattack"):
-                # unsavory way to pass custom dataset classes
-                # ex: dataset = ('textattack.datasets.helpers.TedMultiTranslationDataset', 'en', 'de')
-                dataset = eval(f"{dataset[0]}")(*dataset[1:])
-                return dataset
+                return eval(f"{dataset[0]}")(*dataset[1:])
             else:
                 args.dataset_from_huggingface = dataset
 

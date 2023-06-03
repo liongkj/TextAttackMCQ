@@ -60,12 +60,11 @@ class GoalFunctionResult(ABC):
 
     def __repr__(self):
         main_str = "GoalFunctionResult( "
-        lines = []
-        lines.append(
+        lines = [
             utils.add_indent(
                 f"(goal_function_result_type): {self.goal_function_result_type}", 2
             )
-        )
+        ]
         lines.append(utils.add_indent(f"(attacked_text): {self.attacked_text.text}", 2))
         lines.append(
             utils.add_indent(f"(ground_truth_output): {self.ground_truth_output}", 2)

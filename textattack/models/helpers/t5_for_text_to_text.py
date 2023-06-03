@@ -90,7 +90,6 @@ class T5ForTextToText(torch.nn.Module):
         """
         if name_or_path in TEXTATTACK_MODELS:
             t5 = cls(TEXTATTACK_MODELS[name_or_path])
-            return t5
         else:
             config_path = os.path.join(name_or_path, "t5-wrapper-config.json")
             with open(config_path, "r") as f:
@@ -102,7 +101,8 @@ class T5ForTextToText(torch.nn.Module):
                 name_or_path
             )
             t5.tokenizer = T5Tokenizer(t5.mode, max_length=t5.output_max_length)
-            return t5
+
+        return t5
 
     def get_input_embeddings(self):
         return self.model.get_input_embeddings()

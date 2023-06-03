@@ -53,24 +53,16 @@ class AttackCheckpoint:
         self.attack_log_manager = attack_log_manager
         self.worklist = worklist
         self.worklist_candidates = worklist_candidates
-        if chkpt_time:
-            self.time = chkpt_time
-        else:
-            self.time = time.time()
-
+        self.time = chkpt_time if chkpt_time else time.time()
         self._verify()
 
     def __repr__(self):
         main_str = "AttackCheckpoint("
-        lines = []
-        lines.append(utils.add_indent(f"(Time):  {self.datetime}", 2))
-
+        lines = [utils.add_indent(f"(Time):  {self.datetime}", 2)]
         args_lines = []
-        recipe_set = (
-            True
-            if "recipe" in self.attack_args.__dict__
+        recipe_set = bool(
+            "recipe" in self.attack_args.__dict__
             and self.attack_args.__dict__["recipe"]
-            else False
         )
         mutually_exclusive_args = ["search", "transformation", "constraints", "recipe"]
         if recipe_set:
@@ -78,37 +70,35 @@ class AttackCheckpoint:
                 utils.add_indent(f'(recipe): {self.attack_args.__dict__["recipe"]}', 2)
             )
         else:
-            args_lines.append(
-                utils.add_indent(f'(search): {self.attack_args.__dict__["search"]}', 2)
-            )
-            args_lines.append(
-                utils.add_indent(
-                    f'(transformation): {self.attack_args.__dict__["transformation"]}',
-                    2,
+            args_lines.extend(
+                (
+                    utils.add_indent(
+                        f'(search): {self.attack_args.__dict__["search"]}', 2
+                    ),
+                    utils.add_indent(
+                        f'(transformation): {self.attack_args.__dict__["transformation"]}',
+                        2,
+                    ),
+                    utils.add_indent(
+                        f'(constraints): {self.attack_args.__dict__["constraints"]}',
+                        2,
+                    ),
                 )
             )
-            args_lines.append(
-                utils.add_indent(
-                    f'(constraints): {self.attack_args.__dict__["constraints"]}', 2
-                )
-            )
-
-        for key in self.attack_args.__dict__:
-            if key not in mutually_exclusive_args:
-                args_lines.append(
-                    utils.add_indent(f"({key}): {self.attack_args.__dict__[key]}", 2)
-                )
-
+        args_lines.extend(
+            utils.add_indent(f"({key}): {self.attack_args.__dict__[key]}", 2)
+            for key in self.attack_args.__dict__
+            if key not in mutually_exclusive_args
+        )
         args_str = utils.add_indent("\n" + "\n".join(args_lines), 2)
         lines.append(utils.add_indent(f"(attack_args):  {args_str}", 2))
 
-        attack_logger_lines = []
-        attack_logger_lines.append(
+        attack_logger_lines = [
             utils.add_indent(
                 f"(Total number of examples to attack): {self.attack_args.num_examples}",
                 2,
             )
-        )
+        ]
         attack_logger_lines.append(
             utils.add_indent(f"(Number of attacks performed): {self.results_count}", 2)
         )
@@ -117,12 +107,11 @@ class AttackCheckpoint:
                 f"(Number of remaining attacks): {self.num_remaining_attacks}", 2
             )
         )
-        breakdown_lines = []
-        breakdown_lines.append(
+        breakdown_lines = [
             utils.add_indent(
                 f"(Number of successful attacks): {self.num_successful_attacks}", 2
             )
-        )
+        ]
         breakdown_lines.append(
             utils.add_indent(
                 f"(Number of failed attacks): {self.num_failed_attacks}", 2
@@ -186,12 +175,10 @@ class AttackCheckpoint:
 
     @property
     def num_remaining_attacks(self):
-        if self.attack_args.attack_n:
-            non_skipped_attacks = self.num_successful_attacks + self.num_failed_attacks
-            count = self.attack_args.num_examples - non_skipped_attacks
-        else:
-            count = self.attack_args.num_examples - self.results_count
-        return count
+        if not self.attack_args.attack_n:
+            return self.attack_args.num_examples - self.results_count
+        non_skipped_attacks = self.num_successful_attacks + self.num_failed_attacks
+        return self.attack_args.num_examples - non_skipped_attacks
 
     @property
     def dataset_offset(self):
@@ -204,16 +191,14 @@ class AttackCheckpoint:
         return datetime.datetime.fromtimestamp(self.time).strftime("%Y-%m-%d %H:%M:%S")
 
     def save(self, quiet=False):
-        file_name = "{}.ta.chkpt".format(int(self.time * 1000))
+        file_name = f"{int(self.time * 1000)}.ta.chkpt"
         if not os.path.exists(self.attack_args.checkpoint_dir):
             os.makedirs(self.attack_args.checkpoint_dir)
         path = os.path.join(self.attack_args.checkpoint_dir, file_name)
         if not quiet:
             print("\n\n" + "=" * 125)
             logger.info(
-                'Saving checkpoint under "{}" at {} after {} attacks.'.format(
-                    path, self.datetime, self.results_count
-                )
+                f'Saving checkpoint under "{path}" at {self.datetime} after {self.results_count} attacks.'
             )
             print("=" * 125 + "\n")
         with open(path, "wb") as f:

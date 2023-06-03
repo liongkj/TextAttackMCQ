@@ -70,8 +70,9 @@ class TestAttackedText:
 
     def test_big_window_around_index(self, attacked_text):
         assert (
-            attacked_text.text_window_around_index(0, 10**5) + "."
-        ) == attacked_text.text
+            f"{attacked_text.text_window_around_index(0, 10**5)}."
+            == attacked_text.text
+        )
 
     def test_window_around_index_start(self, attacked_text):
         assert attacked_text.text_window_around_index(0, 3) == "A person walks"
@@ -87,7 +88,7 @@ class TestAttackedText:
     def test_printable_text(self, attacked_text, attacked_text_pair):
         assert attacked_text.printable_text() == raw_text
         desired_printed_pair_text = (
-            "Premise: " + premise + "\n" + "Hypothesis: " + hypothesis
+            f"Premise: {premise}" + "\n" + "Hypothesis: " + hypothesis
         )
         print("p =>", attacked_text_pair.printable_text())
         print("d =>", desired_printed_pair_text)

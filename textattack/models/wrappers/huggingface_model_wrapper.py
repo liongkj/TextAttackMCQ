@@ -60,16 +60,7 @@ class HuggingFaceModelWrapper(PyTorchModelWrapper):
         with torch.no_grad():
             outputs = self.model(**inputs_dict)
 
-        if isinstance(outputs[0], str):
-            # HuggingFace sequence-to-sequence models return a list of
-            # string predictions as output. In this case, return the full
-            # list of outputs.
-            return outputs
-        else:
-            # HuggingFace classification models return a tuple as output
-            # where the first item in the tuple corresponds to the list of
-            # scores for each input.
-            return outputs.logits
+        return outputs if isinstance(outputs[0], str) else outputs.logits
 
     def get_grad(self, text_input):
         """Get gradient of loss with respect to input tokens.

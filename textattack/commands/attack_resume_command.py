@@ -53,14 +53,12 @@ class AttackResumeCommand(TextAttackCommand):
             ]
             assert chkpt_file_names, "AttackCheckpoint directory is empty"
             timestamps = [int(f.replace(".ta.chkpt", "")) for f in chkpt_file_names]
-            latest_file = str(max(timestamps)) + ".ta.chkpt"
+            latest_file = f"{str(max(timestamps))}.ta.chkpt"
             checkpoint_path = os.path.join(dir_path, latest_file)
         else:
             checkpoint_path = args.checkpoint_file
 
-        checkpoint = textattack.shared.AttackCheckpoint.load(checkpoint_path)
-
-        return checkpoint
+        return textattack.shared.AttackCheckpoint.load(checkpoint_path)
 
     @staticmethod
     def register_subcommand(main_parser: ArgumentParser):

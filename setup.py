@@ -6,42 +6,38 @@ from docs import conf as docs_conf
 with open("README.md", "r", encoding="utf8") as fh:
     long_description = fh.read()
 
-extras = {}
-# Packages required for installing docs.
-extras["docs"] = [
-    "recommonmark",
-    "nbsphinx",
-    "sphinx-autobuild",
-    "sphinx-rtd-theme",
-    "sphinx-markdown-tables",
-    "sphinx-copybutton",
-]
-# Packages required for formatting code & running tests.
-extras["test"] = [
-    "black==20.8b1",
-    "docformatter",
-    "isort==5.6.4",
-    "flake8",
-    "pytest",
-    "pytest-xdist",
-]
-
-extras["tensorflow"] = [
-    "tensorflow==2.9.1",
-    "tensorflow_hub",
-    "tensorflow_text>=2",
-    "tensorboardX",
-    "tensorflow-estimator==2.9.0",
-]
-
-extras["optional"] = [
-    "sentence_transformers==2.2.0",
-    "stanza",
-    "visdom",
-    "wandb",
-    "gensim==4.1.2",
-]
-
+extras = {
+    "docs": [
+        "recommonmark",
+        "nbsphinx",
+        "sphinx-autobuild",
+        "sphinx-rtd-theme",
+        "sphinx-markdown-tables",
+        "sphinx-copybutton",
+    ],
+    "test": [
+        "black==20.8b1",
+        "docformatter",
+        "isort==5.6.4",
+        "flake8",
+        "pytest",
+        "pytest-xdist",
+    ],
+    "tensorflow": [
+        "tensorflow==2.9.1",
+        "tensorflow_hub",
+        "tensorflow_text>=2",
+        "tensorboardX",
+        "tensorflow-estimator==2.9.0",
+    ],
+    "optional": [
+        "sentence_transformers==2.2.0",
+        "stanza",
+        "visdom",
+        "wandb",
+        "gensim==4.1.2",
+    ],
+}
 # For developers, install development tools along with all optional dependencies.
 extras["dev"] = (
     extras["docs"] + extras["test"] + extras["tensorflow"] + extras["optional"]

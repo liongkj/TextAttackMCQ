@@ -59,7 +59,7 @@ class GoogLMHelper:
         weights = np.ones([self.BATCH_SIZE, self.NUM_TIMESTEPS], np.float32)
 
         if prefix_words.find("<S>") != 0:
-            prefix_words = "<S> " + prefix_words
+            prefix_words = f"<S> {prefix_words}"
         prefix = [self.vocab.word_to_id(w) for w in prefix_words.split()]
         prefix_char_ids = [self.vocab.word_to_char_ids(w) for w in prefix_words.split()]
 

@@ -192,8 +192,8 @@ class Trainer:
                 num_workers_per_device=self.training_args.attack_num_workers_per_device,
                 disable_stdout=True,
                 silent=True,
-                log_to_txt=log_file_name + ".txt",
-                log_to_csv=log_file_name + ".csv",
+                log_to_txt=f"{log_file_name}.txt",
+                log_to_csv=f"{log_file_name}.csv",
             )
         elif num_train_adv_examples == -1:
             # set num_examples when num_train_adv_examples = -1
@@ -206,8 +206,8 @@ class Trainer:
                 num_workers_per_device=self.training_args.attack_num_workers_per_device,
                 disable_stdout=True,
                 silent=True,
-                log_to_txt=log_file_name + ".txt",
-                log_to_csv=log_file_name + ".csv",
+                log_to_txt=f"{log_file_name}.txt",
+                log_to_csv=f"{log_file_name}.csv",
             )
         else:
             assert False, "num_train_adv_examples is negative and not equal to -1."
@@ -239,8 +239,7 @@ class Trainer:
             if isinstance(r, (SuccessfulAttackResult, MaximizedAttackResult))
         ]
 
-        # Name for column indicating if an example is adversarial is set as "_example_type".
-        adversarial_dataset = textattack.datasets.Dataset(
+        return textattack.datasets.Dataset(
             adversarial_examples,
             input_columns=self.train_dataset.input_columns + ("_example_type",),
             label_map=self.train_dataset.label_map,
@@ -248,7 +247,6 @@ class Trainer:
             output_scale_factor=self.train_dataset.output_scale_factor,
             shuffle=False,
         )
-        return adversarial_dataset
 
     def _print_training_args(
         self, total_training_steps, train_batch_size, num_clean_epochs
@@ -349,13 +347,15 @@ class Trainer:
                     "params": [
                         p
                         for n, p in param_optimizer
-                        if not any(nd in n for nd in no_decay)
+                        if all(nd not in n for nd in no_decay)
                     ],
                     "weight_decay": self.training_args.weight_decay,
                 },
                 {
                     "params": [
-                        p for n, p in param_optimizer if any(nd in n for nd in no_decay)
+                        p
+                        for n, p in param_optimizer
+                        if any(nd in n for nd in no_decay)
                     ],
                     "weight_decay": 0.0,
                 },
@@ -587,11 +587,7 @@ class Trainer:
             input_ids = input_ids.to(textattack.shared.utils.device)
             logits = model(input_ids)
 
-        if self.task_type == "regression":
-            preds = logits
-        else:
-            preds = logits.argmax(dim=-1)
-
+        preds = logits if self.task_type == "regression" else logits.argmax(dim=-1)
         return preds.cpu(), _targets
 
     def train(self):
@@ -902,7 +898,7 @@ class Trainer:
         eval_dataloader = self.get_eval_dataloader(self.eval_dataset, eval_batch_size)
 
         with torch.no_grad():
-            for step, batch in enumerate(eval_dataloader):
+            for batch in eval_dataloader:
                 preds, targets = self.evaluate_step(model, tokenizer, batch)
                 all_preds.append(preds)
                 all_targets.append(targets)

@@ -131,7 +131,7 @@ class InferSentModel(nn.Module):
                 word, vec = line.split(" ", 1)
                 if word in word_dict:
                     word_vec[word] = np.fromstring(vec, sep=" ")
-        print("Found %s(/%s) words with w2v vectors" % (len(word_vec), len(word_dict)))
+        print(f"Found {len(word_vec)}(/{len(word_dict)}) words with w2v vectors")
         return word_vec
 
     def get_w2v_k(self, K):
@@ -149,7 +149,7 @@ class InferSentModel(nn.Module):
                     if word in [self.bos, self.eos]:
                         word_vec[word] = np.fromstring(vec, sep=" ")
 
-                if k > K and all([w in word_vec for w in [self.bos, self.eos]]):
+                if k > K and all(w in word_vec for w in [self.bos, self.eos]):
                     break
         return word_vec
 
@@ -182,8 +182,7 @@ class InferSentModel(nn.Module):
         else:
             new_word_vec = []
         print(
-            "New vocab size : %s (added %s words)"
-            % (len(self.word_vec), len(new_word_vec))
+            f"New vocab size : {len(self.word_vec)} (added {len(new_word_vec)} words)"
         )
 
     def get_batch(self, batch):
@@ -200,12 +199,11 @@ class InferSentModel(nn.Module):
     def tokenize(self, s):
         from nltk.tokenize import word_tokenize
 
-        if self.moses_tok:
-            s = " ".join(word_tokenize(s))
-            s = s.replace(" n't ", "n 't ")  # HACK to get ~MOSES tokenization
-            return s.split()
-        else:
+        if not self.moses_tok:
             return word_tokenize(s)
+        s = " ".join(word_tokenize(s))
+        s = s.replace(" n't ", "n 't ")  # HACK to get ~MOSES tokenization
+        return s.split()
 
     def prepare_samples(self, sentences, bsize, tokenize, verbose):
         sentences = [

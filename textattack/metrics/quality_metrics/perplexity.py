@@ -71,12 +71,10 @@ class Perplexity(Metric):
         self.original_candidates_ppl = []
         self.successful_candidates_ppl = []
 
-        for i, result in enumerate(self.results):
-            if isinstance(result, FailedAttackResult):
-                continue
-            elif isinstance(result, SkippedAttackResult):
-                continue
-            else:
+        for result in self.results:
+            if not isinstance(result, FailedAttackResult) and not isinstance(
+                result, SkippedAttackResult
+            ):
                 self.original_candidates.append(
                     result.original_result.attacked_text.text.lower()
                 )

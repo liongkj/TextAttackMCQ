@@ -29,12 +29,11 @@ class LanguageTool(Constraint):
 
     def get_errors(self, attacked_text, use_cache=False):
         text = attacked_text.text
-        if use_cache:
-            if text not in self.grammar_error_cache:
-                self.grammar_error_cache[text] = len(self.lang_tool.check(text))
-            return self.grammar_error_cache[text]
-        else:
+        if not use_cache:
             return len(self.lang_tool.check(text))
+        if text not in self.grammar_error_cache:
+            self.grammar_error_cache[text] = len(self.lang_tool.check(text))
+        return self.grammar_error_cache[text]
 
     def _check_constraint(self, transformed_text, reference_text):
         original_num_errors = self.get_errors(reference_text, use_cache=True)

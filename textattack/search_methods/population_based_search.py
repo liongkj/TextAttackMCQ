@@ -30,7 +30,7 @@ class PopulationBasedSearch(SearchMethod, ABC):
         filtered = self.filter_transformations(
             [transformed_text], current_text, original_text=original_text
         )
-        return True if filtered else False
+        return bool(filtered)
 
     @abstractmethod
     def _perturb(self, pop_member, original_result, **kwargs):

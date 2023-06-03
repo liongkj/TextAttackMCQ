@@ -43,6 +43,4 @@ class ChineseHomophoneCharacterSwap(WordSwap):
                                     word[:i] + repl_character + word[i + 1 :]
                                 )
                                 candidate_words.append(candidate_word)
-            else:
-                pass
         return candidate_words

@@ -43,30 +43,26 @@ class ListThingsCommand(TextAttackCommand):
         elif isinstance(list_of_things, dict):
             for thing in sorted(list_of_things.keys()):
                 thing_long_description = list_of_things[thing]
-                if plain:
-                    thing_key = thing
-                else:
-                    thing_key = _cb(thing)
+                thing_key = thing if plain else _cb(thing)
                 print(f"{thing_key} ({thing_long_description})")
         else:
             raise TypeError(f"Cannot print list of type {type(list_of_things)}")
 
     @staticmethod
     def things():
-        list_dict = {}
-        list_dict["models"] = list(HUGGINGFACE_MODELS.keys()) + list(
-            TEXTATTACK_MODELS.keys()
-        )
-        list_dict["search-methods"] = SEARCH_METHOD_CLASS_NAMES
-        list_dict["transformations"] = {
-            **BLACK_BOX_TRANSFORMATION_CLASS_NAMES,
-            **WHITE_BOX_TRANSFORMATION_CLASS_NAMES,
+        return {
+            "models": list(HUGGINGFACE_MODELS.keys())
+            + list(TEXTATTACK_MODELS.keys()),
+            "search-methods": SEARCH_METHOD_CLASS_NAMES,
+            "transformations": {
+                **BLACK_BOX_TRANSFORMATION_CLASS_NAMES,
+                **WHITE_BOX_TRANSFORMATION_CLASS_NAMES,
+            },
+            "constraints": CONSTRAINT_CLASS_NAMES,
+            "goal-functions": GOAL_FUNCTION_CLASS_NAMES,
+            "attack-recipes": ATTACK_RECIPE_NAMES,
+            "augmentation-recipes": AUGMENTATION_RECIPE_NAMES,
         }
-        list_dict["constraints"] = CONSTRAINT_CLASS_NAMES
-        list_dict["goal-functions"] = GOAL_FUNCTION_CLASS_NAMES
-        list_dict["attack-recipes"] = ATTACK_RECIPE_NAMES
-        list_dict["augmentation-recipes"] = AUGMENTATION_RECIPE_NAMES
-        return list_dict
 
     def run(self, args):
         try:

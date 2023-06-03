@@ -617,19 +617,18 @@ class _CommandLineAttackArgs:
                 raise ValueError(
                     f"Error: unsupported transformation {transformation_name}"
                 )
+        elif transformation_name in WHITE_BOX_TRANSFORMATION_CLASS_NAMES:
+            transformation = eval(
+                f"{WHITE_BOX_TRANSFORMATION_CLASS_NAMES[transformation_name]}(model_wrapper.model)"
+            )
+        elif transformation_name in BLACK_BOX_TRANSFORMATION_CLASS_NAMES:
+            transformation = eval(
+                f"{BLACK_BOX_TRANSFORMATION_CLASS_NAMES[transformation_name]}()"
+            )
         else:
-            if transformation_name in WHITE_BOX_TRANSFORMATION_CLASS_NAMES:
-                transformation = eval(
-                    f"{WHITE_BOX_TRANSFORMATION_CLASS_NAMES[transformation_name]}(model_wrapper.model)"
-                )
-            elif transformation_name in BLACK_BOX_TRANSFORMATION_CLASS_NAMES:
-                transformation = eval(
-                    f"{BLACK_BOX_TRANSFORMATION_CLASS_NAMES[transformation_name]}()"
-                )
-            else:
-                raise ValueError(
-                    f"Error: unsupported transformation {transformation_name}"
-                )
+            raise ValueError(
+                f"Error: unsupported transformation {transformation_name}"
+            )
         return transformation
 
     @classmethod
