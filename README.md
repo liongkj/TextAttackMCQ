@@ -1,3 +1,5 @@
+** Modified so that multiple choice datasets could be attack
+
 <h1 align="center">TextAttack 🐙</h1>
 
 <p align="center">Generating adversarial examples for NLP models</p>
