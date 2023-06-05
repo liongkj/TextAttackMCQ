@@ -56,7 +56,7 @@ class WeightsAndBiasesLogger(Logger):
         )
         wandb.log({"results": wandb.Html(result_table)})
 
-    def log_attack_result(self, result):
+    def log_attack_result(self, result,options=None):
         original_text_colored, perturbed_text_colored = result.diff_color(
             color_method="html"
         )

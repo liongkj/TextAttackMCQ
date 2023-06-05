@@ -5,20 +5,13 @@ Managing Attack Logs.
 
 from typing import Dict, Optional
 
-from textattack.metrics.attack_metrics import (
-    AttackQueries,
-    AttackSuccessRate,
-    WordsPerturbed,
-)
+from textattack.metrics.attack_metrics import (AttackQueries,
+                                               AttackSuccessRate,
+                                               WordsPerturbed)
 from textattack.metrics.quality_metrics import Perplexity, USEMetric
 
-from . import (
-    CSVLogger,
-    FileLogger,
-    JsonSummaryLogger,
-    VisdomLogger,
-    WeightsAndBiasesLogger,
-)
+from . import (CSVLogger, FileLogger, JsonSummaryLogger, VisdomLogger,
+               WeightsAndBiasesLogger)
 
 
 class AttackLogManager:
@@ -57,11 +50,11 @@ class AttackLogManager:
     def add_output_summary_json(self, filename):
         self.loggers.append(JsonSummaryLogger(filename=filename))
 
-    def log_result(self, result):
+    def log_result(self, result,options=None):
         """Logs an ``AttackResult`` on each of `self.loggers`."""
         self.results.append(result)
         for logger in self.loggers:
-            logger.log_attack_result(result)
+            logger.log_attack_result(result,options=options)
 
     def log_results(self, results):
         """Logs an iterable of ``AttackResult`` objects on each of

@@ -94,7 +94,6 @@ class HuggingFaceModelWrapper(PyTorchModelWrapper):
                 return_dict=False,
             )
         # print(outputs)
-        del inputs_dict
         if isinstance(outputs[0], str):
             # HuggingFace sequence-to-sequence models return a list of
             # string predictions as output. In this case, return the full

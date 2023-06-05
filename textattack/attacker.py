@@ -184,7 +184,7 @@ class Attacker:
             else:
                 pbar.update(1)
 
-            self.attack_log_manager.log_result(result)
+            self.attack_log_manager.log_result(result,options)
             if not self.attack_args.disable_stdout and not self.attack_args.silent:
                 print("\n")
             num_results += 1

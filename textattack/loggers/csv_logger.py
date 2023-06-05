@@ -6,7 +6,6 @@ Attack Logs to CSV
 import csv
 
 import pandas as pd
-
 from textattack.shared import AttackedText, logger
 
 from .logger import Logger
@@ -22,7 +21,7 @@ class CSVLogger(Logger):
         self.row_list = []
         self._flushed = True
 
-    def log_attack_result(self, result):
+    def log_attack_result(self, result,options=None):
         original_text, perturbed_text = result.diff_color(self.color_method)
         original_text = original_text.replace("\n", AttackedText.SPLIT_TOKEN)
         perturbed_text = perturbed_text.replace("\n", AttackedText.SPLIT_TOKEN)
@@ -38,6 +37,8 @@ class CSVLogger(Logger):
             "num_queries": result.num_queries,
             "result_type": result_type,
         }
+        for idx, i in enumerate(list(options.values())[1:]):
+            row[f"choice{idx}"] = i
         self.row_list.append(row)
         self._flushed = False
 
