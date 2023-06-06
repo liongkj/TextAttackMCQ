@@ -30,7 +30,7 @@ class UntargetedClassification(ClassificationGoalFunction):
         ):
             return abs(self.ground_truth_output - model_output.item()) >= 0.5
         else:
-            return model_output.argmax() != self.ground_truth_output
+            return model_output.numpy().argmax() != self.ground_truth_output
 
     def _get_score(self, model_output, _):
         # If the model outputs a single number and the ground truth output is

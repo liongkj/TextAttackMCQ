@@ -8,13 +8,12 @@ A Strong Baseline for Natural Language Attack on Text Classification and Entailm
 
 from textattack import Attack
 from textattack.constraints.grammaticality import PartOfSpeech
-from textattack.constraints.pre_transformation import (
-    InputColumnModification,
-    RepeatModification,
-    StopwordModification,
-)
+from textattack.constraints.pre_transformation import (InputColumnModification,
+                                                       RepeatModification,
+                                                       StopwordModification)
 from textattack.constraints.semantics import WordEmbeddingDistance
-from textattack.constraints.semantics.sentence_encoders import UniversalSentenceEncoder
+from textattack.constraints.semantics.sentence_encoders import \
+    UniversalSentenceEncoder
 from textattack.goal_functions import UntargetedClassification
 from textattack.search_methods import GreedyWordSwapWIR
 from textattack.transformations import WordSwapEmbedding
@@ -52,7 +51,7 @@ class TextFoolerJin2019(AttackRecipe):
         # the same.
         #
         input_column_modification = InputColumnModification(
-            ["premise", "hypothesis"], {"premise"}
+            ["premise", "hypothesis","ctx","dialogue","text"], {"premise","question","choice","choice0","choice1","choice2","choice3"}
         )
         constraints.append(input_column_modification)
         # Minimum word embedding cosine similarity of 0.5.

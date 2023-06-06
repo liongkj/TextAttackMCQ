@@ -12,7 +12,7 @@ from textattack.models.tokenizers import T5Tokenizer
 from .pytorch_model_wrapper import PyTorchModelWrapper
 
 torch.cuda.empty_cache()
-
+torch.manual_seed(43)
 
 class HuggingFaceModelWrapper(PyTorchModelWrapper):
     """Loads a HuggingFace ``transformers`` model and tokenizer."""
@@ -88,10 +88,10 @@ class HuggingFaceModelWrapper(PyTorchModelWrapper):
             outputs = self.model(
                 **inputs_dict,
                 args=self.attack_args,
-                output_hidden_states=False,
+                # output_hidden_states=False,
                 output_attentions=True,
-                # head_mask=head_mask,
-                return_dict=False,
+                # # head_mask=head_mask,
+                # return_dict=False,
             )
         # print(outputs)
         if isinstance(outputs[0], str):

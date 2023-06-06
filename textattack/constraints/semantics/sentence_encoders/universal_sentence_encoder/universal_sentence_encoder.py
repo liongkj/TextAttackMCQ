@@ -29,10 +29,11 @@ class UniversalSentenceEncoder(SentenceEncoder):
         # Lazily load the model
         self.model = None
         gpus = tf.config.experimental.list_physical_devices('GPU')
+        ##### Hack for tensorflow gpu not releasing memory after inference
         if gpus:
         # Restrict TensorFlow to only use the first GPU
             try:
-                tf.config.experimental.set_visible_devices(gpus[1], 'GPU')
+                tf.config.experimental.set_visible_devices(gpus[-1], 'GPU')
             except RuntimeError as e:
                 # Visible devices must be set at program startup
                 print(e)
@@ -41,12 +42,6 @@ class UniversalSentenceEncoder(SentenceEncoder):
         if not self.model:
             self.model = hub.load(self._tfhub_url)
         encoding = self.model(sentences)
-        # queue = Queue()  # Here
-        # p1 = Process(target=self.model, args=(sentences))
-        # p1.start()
-        # p1.join()
-
-        # res = queue.get()
         if isinstance(encoding, dict):
             encoding = encoding["outputs"]
 

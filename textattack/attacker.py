@@ -161,11 +161,15 @@ class Attacker:
             ismcq = len(example) > 2
             if ismcq:
                 options = example
-            example = textattack.shared.AttackedText(example["ctx"] if ismcq else example )
+            else:
+                options = None
+            example = textattack.shared.AttackedText(
+                example["ctx"] if ismcq else example
+            )
             if self.dataset.label_names is not None:
                 example.attack_attrs["label_names"] = self.dataset.label_names
             try:
-                result = self.attack.attack(example, ground_truth_output,options)
+                result = self.attack.attack(example, ground_truth_output, options)
             except Exception as e:
                 raise e
             if (
@@ -184,7 +188,7 @@ class Attacker:
             else:
                 pbar.update(1)
 
-            self.attack_log_manager.log_result(result,options)
+            self.attack_log_manager.log_result(result, options)
             if not self.attack_args.disable_stdout and not self.attack_args.silent:
                 print("\n")
             num_results += 1
@@ -267,10 +271,12 @@ class Attacker:
                 ismcq = len(example) > 2
                 if ismcq:
                     options = example
-                example = textattack.shared.AttackedText(example["ctx"] if ismcq else example )
+                example = textattack.shared.AttackedText(
+                    example["ctx"] if ismcq else example
+                )
                 if self.dataset.label_names is not None:
                     example.attack_attrs["label_names"] = self.dataset.label_names
-                in_queue.put((i, example, ground_truth_output,options))
+                in_queue.put((i, example, ground_truth_output, options))
             except IndexError:
                 raise IndexError(
                     f"Tried to access element at {i} in dataset of size {len(self.dataset)}."
@@ -589,12 +595,12 @@ def attack_from_queue(
             try:
                 i, example, ground_truth_output = in_queue.get(timeout=5)
             except:
-                i, example, ground_truth_output,options = in_queue.get(timeout=5)
+                i, example, ground_truth_output, options = in_queue.get(timeout=5)
             if i == "END" and example == "END" and ground_truth_output == "END":
                 # End process when sentinel value is received
                 break
             else:
-                result = attack.attack(example, ground_truth_output,options=options)
+                result = attack.attack(example, ground_truth_output, options=options)
                 out_queue.put((i, result))
         except Exception as e:
             if isinstance(e, queue.Empty):

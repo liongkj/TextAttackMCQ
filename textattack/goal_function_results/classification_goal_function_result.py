@@ -5,9 +5,8 @@ ClassificationGoalFunctionResult Class
 
 """
 
-import torch
-
 import textattack
+import torch
 from textattack.shared import utils
 
 from .goal_function_result import GoalFunctionResult

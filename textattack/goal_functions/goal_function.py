@@ -98,6 +98,14 @@ class GoalFunction(ReprMixin, ABC):
             goal_status = self._get_goal_status(
                 raw_output, attacked_text, check_skip=check_skip
             )
+            # if check_skip and (raw_output.argmax() != self.ground_truth_output):
+            #     print(f"prediction is different from groundtruth, pred: {raw_output.argmax()}. label: {self.ground_truth_output} {goal_status}" )
+            #     assert goal_status == 3
+            # if check_skip:
+            #     with open("bertattack.csv","a") as ss:
+            #         ss.write(f"pred: {raw_output.argmax()}. label: {self.ground_truth_output}. Goal: {goal_status}\n")
+                # continue
+            # assert (raw_output.argmax() != self.ground_truth_output) and goal_status == 3, f"prediction is different from groundtruth, pred: {raw_output.argmax()}. label: {self.ground_truth_output} {goal_status}" 
             goal_function_score = self._get_score(raw_output, attacked_text)
             results.append(
                 self._goal_function_result_type()(
