@@ -5,7 +5,7 @@ filelock
 language_tool_python
 lemminflect
 lru-dict
-datasets==2.4.0
+datasets==5.0.1
 nltk
 numpy>=1.21.0
 pandas>=1.0.1
